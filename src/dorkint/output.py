@@ -26,6 +26,6 @@ def sauvegarder(texte: str, chemin: Path, ecraser: bool = False) -> None:
     if chemin.exists() and not ecraser:
         raise DorkintError(f"Le fichier '{chemin}' existe déjà (utiliser --force pour l'écraser).")
     try:
-        chemin.write_text(texte + "\n", encoding="utf-8")
+        chemin.write_text(texte, encoding="utf-8")
     except OSError as erreur:
         raise DorkintError(f"Impossible d'écrire '{chemin}' : {erreur.strerror}.") from erreur
