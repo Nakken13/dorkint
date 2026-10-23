@@ -12,7 +12,7 @@ def variantes_tel(numero: str) -> list[str]:
 
     Branchée sur le mode via `Mode.variantes` : `{principal}` devient `("a" OR "b" ...)`.
     """
-    brut = re.sub(r"[\s.\-()]", "", numero)
+    brut = re.sub(r"[\s.\-()]", "", numero.replace("(0)", ""))
     match = _FR.match(brut)
     if not match:
         return [numero]

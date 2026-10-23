@@ -117,3 +117,27 @@ def test_derive_adds_placeholders_usable_in_templates(monkeypatch: pytest.Monkey
 def test_derived_placeholder_must_be_declared() -> None:
     with pytest.raises(DorkintError, match="non déclaré"):
         Mode("x", (), (Category("A", (Template("{principal} {local}", requires=("local",)),)),))
+
+
+def test_derive_cannot_override_or_add_undeclared_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    mode = Mode(
+        "derive2",
+        (),
+        (Category("A", (Template("{principal}"),)),),
+        derive=lambda v: {"principal": "PIRATE", "inconnu": "x", "local": ' a "b" '},
+        derived=("local",),
+    )
+    monkeypatch.setitem(builder._REGISTRY, "derive2", mode)
+    assert generer("derive2", "jean", {})["A"][0].query == '"jean"'
+
+
+def test_variantes_are_deduplicated_and_raw_ignores_them(monkeypatch: pytest.MonkeyPatch) -> None:
+    mode = Mode(
+        "multi2",
+        (),
+        (Category("A", (Template("{principal}"), Template("inurl:{principal:raw}"))),),
+        variantes=lambda v: [v, v, f'"{v}"', v + "2"],
+    )
+    monkeypatch.setitem(builder._REGISTRY, "multi2", mode)
+    requetes = [d.query for d in generer("multi2", "x", {})["A"]]
+    assert requetes == ['("x" OR "x2")', "inurl:x"]

@@ -27,7 +27,9 @@ def test_chaque_categorie_produit_un_dork() -> None:
 def test_valeur_principale_entre_guillemets() -> None:
     for dorks in generer("mail", ADRESSE, {"ville": "Lyon", "entreprise": "Acme"}).values():
         for dork in dorks:
-            assert f'"{ADRESSE}"' in dork.query or '"jean' in dork.query  # partie locale seule
+            if dork.category == "Partie locale et domaine" and "site:jean" not in dork.query and '"jean"' in dork.query:
+                continue  # dorks sur la seule partie locale
+            assert f'"{ADRESSE}"' in dork.query
 
 
 def test_categories_attendues() -> None:
@@ -77,7 +79,6 @@ def test_affinage_inconnu_refuse(affinage: str) -> None:
 
 def test_partie_locale_et_domaine_recherchees_separement() -> None:
     requetes = [d.query for d in generer("mail", "jean.dupont@exemple.fr")["Partie locale et domaine"]]
-    assert '"jean.dupont"' in requetes
     assert '"jean.dupont" site:exemple.fr' in requetes
     assert '"jean.dupont" -site:exemple.fr' in requetes
 
@@ -85,4 +86,10 @@ def test_partie_locale_et_domaine_recherchees_separement() -> None:
 def test_valeur_sans_arobase_n_a_pas_de_variantes_locale_domaine() -> None:
     requetes = [d.query for d in generer("mail", "jean.dupont")["Partie locale et domaine"]]
     assert all("site:exemple" not in q for q in requetes)
-    assert '"jean.dupont"' not in requetes
+    assert not any("site:" in q and "jean.dupont" in q and "-site:linkedin" not in q for q in requetes)
+
+
+@pytest.mark.parametrize("saisie", ["jean@localhost", "a@b@c.fr", "jean@", "@exemple.fr", "jean@exemple.fr foo"])
+def test_adresse_invalide_sans_valeurs_derivees(saisie: str) -> None:
+    requetes = [d.query for d in generer("mail", saisie)["Partie locale et domaine"]]
+    assert not any("site:exemple" in q or "site:localhost" in q or "site:c.fr" in q for q in requetes)

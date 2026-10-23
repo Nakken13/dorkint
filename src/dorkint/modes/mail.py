@@ -1,12 +1,18 @@
 """Mode `mail` : mentions publiques d'une adresse email (aucune base de fuite)."""
 
+import re
+
 from dorkint.builder import Category, Mode, Template, register
+
+_ADRESSE = re.compile(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", re.IGNORECASE)
 
 
 def _decouper(adresse: str) -> dict[str, str]:
     """Partie locale et domaine d'une adresse ; vide si ce n'est pas une adresse."""
-    local, arobase, domaine = adresse.rpartition("@")
-    return {"local": local, "domaine": domaine} if arobase and local and domaine else {}
+    if not _ADRESSE.fullmatch(adresse):
+        return {}
+    local, _, domaine = adresse.partition("@")
+    return {"local": local, "domaine": domaine}
 
 
 register(
@@ -79,7 +85,6 @@ register(
             Category(
                 "Partie locale et domaine",
                 (
-                    Template("{local}", requires=("local",)),
                     Template("{local} site:{domaine:raw}", requires=("local", "domaine")),
                     Template("{local} -site:{domaine:raw}", requires=("local", "domaine")),
                     Template("inurl:{principal}"),

@@ -3,7 +3,7 @@
 import importlib
 import pkgutil
 import re
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
 from dorkint.guardrails import termes_interdits
@@ -95,15 +95,12 @@ def get_mode(name: str) -> Mode:
     return _REGISTRY[name]
 
 
-def _render(template: Template, values: Mapping[str, str], variantes: Sequence[str] = ()) -> str:
+def _render(template: Template, values: Mapping[str, str], groupe: str | None = None) -> str:
     def substitute(match: re.Match[str]) -> str:
         name, raw = match.groups()
-        value = values[name]
         if raw:
-            return value
-        if name == "principal" and len(variantes) > 1:
-            return "(" + " OR ".join(f'"{v}"' for v in variantes) + ")"
-        return f'"{value}"'
+            return values[name]  # `:raw` ignore aussi les variantes du principal
+        return groupe if name == "principal" and groupe else f'"{values[name]}"'
 
     return _PLACEHOLDER.sub(substitute, template.pattern)
 
@@ -126,8 +123,9 @@ def generer(
     values = {"principal": principal}
     values.update({k: c for k, v in (affinages or {}).items() if (c := _clean(v))})
     if mode.derive:
-        values.update(mode.derive(principal))
-    variantes = [c for v in mode.variantes(principal) if (c := _clean(v))] if mode.variantes else []
+        values.update({k: c for k, v in mode.derive(principal).items() if k in mode.derived and (c := _clean(v))})
+    variantes = list(dict.fromkeys(c for v in mode.variantes(principal) if (c := _clean(v)))) if mode.variantes else []
+    groupe = "(" + " OR ".join(f'"{v}"' for v in variantes) + ")" if len(variantes) > 1 else None
 
     result: dict[str, list[Dork]] = {}
     for category in mode.categories:
@@ -135,7 +133,7 @@ def generer(
         for template in category.templates:
             if not all(r in values for r in template.requires):
                 continue
-            query = _render(template, values, variantes)
+            query = _render(template, values, groupe)
             if query not in seen:
                 seen.add(query)
                 result.setdefault(category.name, []).append(Dork(category.name, query))

@@ -86,3 +86,7 @@ def test_toutes_les_ecritures_du_numero_sont_cherchees() -> None:
     for ecriture in ("06 12 34 56 78", "06.12.34.56.78", "0612345678", "+33 6 12 34 56 78", "+33612345678"):
         assert f'"{ecriture}"' in requete
     assert " OR " in requete
+
+
+def test_indicatif_avec_zero_entre_parentheses() -> None:
+    assert variantes_tel("+33 (0)6 12 34 56 78") == variantes_tel("06 12 34 56 78")
