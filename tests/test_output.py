@@ -3,13 +3,13 @@ from pathlib import Path
 import pytest
 
 from dorkint.builder import Dork, DorkintError
-from dorkint.output import formater, sauvegarder, vers_url_google
+from dorkint.output import format_dorks, save, to_google_url
 
 BASE = "https://www.google.com/search?q="
 
 
 @pytest.mark.parametrize(
-    ("requete", "attendu"),
+    ("query", "attendu"),
     [
         ("jean dupont", "jean+dupont"),
         ('"Jean Dupont"', "%22Jean+Dupont%22"),
@@ -19,45 +19,45 @@ BASE = "https://www.google.com/search?q="
         ("a OR b -c", "a+OR+b+-c"),
     ],
 )
-def test_vers_url_google_encodes(requete: str, attendu: str) -> None:
-    assert vers_url_google(requete) == BASE + attendu
+def test_vers_url_google_encodes(query: str, attendu: str) -> None:
+    assert to_google_url(query) == BASE + attendu
 
 
-def test_formater_groups_by_category_with_one_url_per_line() -> None:
-    groupes = {
-        "Réseaux": [Dork("Réseaux", "site:x.com a"), Dork("Réseaux", "site:y.com a")],
-        "Presse": [Dork("Presse", "a presse")],
+def test_format_dorks_groups_by_category_with_one_url_per_line() -> None:
+    groups = {
+        "Networks": [Dork("Networks", "site:x.com a"), Dork("Networks", "site:y.com a")],
+        "Press": [Dork("Press", "a presse")],
     }
-    lignes = formater(groupes).splitlines()
-    assert lignes[0] == "## Réseaux"
-    assert lignes[1] == vers_url_google("site:x.com a")
-    assert lignes[2] == vers_url_google("site:y.com a")
-    assert "## Presse" in lignes
-    assert all(l.startswith(("##", BASE)) or not l for l in lignes)
+    lines = format_dorks(groups).splitlines()
+    assert lines[0] == "## Networks"
+    assert lines[1] == to_google_url("site:x.com a")
+    assert lines[2] == to_google_url("site:y.com a")
+    assert "## Press" in lines
+    assert all(l.startswith(("##", BASE)) or not l for l in lines)
 
 
-def test_formater_empty() -> None:
-    assert formater({}) == ""
+def test_format_dorks_empty() -> None:
+    assert format_dorks({}) == ""
 
 
-def test_sauvegarder_writes_utf8(tmp_path: Path) -> None:
-    cible = tmp_path / "liens.txt"
-    sauvegarder("é\n", cible)
-    assert cible.read_text(encoding="utf-8") == "é\n"
+def test_save_writes_utf8(tmp_path: Path) -> None:
+    target = tmp_path / "liens.txt"
+    save("é\n", target)
+    assert target.read_text(encoding="utf-8") == "é\n"
 
 
-def test_sauvegarder_refuses_overwrite_without_flag(tmp_path: Path) -> None:
-    cible = tmp_path / "liens.txt"
-    cible.write_text("ancien", encoding="utf-8")
-    with pytest.raises(DorkintError, match="existe déjà"):
-        sauvegarder("nouveau", cible)
-    assert cible.read_text(encoding="utf-8") == "ancien"
-    sauvegarder("nouveau", cible, ecraser=True)
-    assert cible.read_text(encoding="utf-8") == "nouveau"
+def test_save_refuses_overwrite_without_flag(tmp_path: Path) -> None:
+    target = tmp_path / "liens.txt"
+    target.write_text("ancien", encoding="utf-8")
+    with pytest.raises(DorkintError, match="already exists"):
+        save("nouveau", target)
+    assert target.read_text(encoding="utf-8") == "ancien"
+    save("nouveau", target, overwrite=True)
+    assert target.read_text(encoding="utf-8") == "nouveau"
 
 
-def test_sauvegarder_invalid_path(tmp_path: Path) -> None:
-    with pytest.raises(DorkintError, match="Impossible"):
-        sauvegarder("x", tmp_path / "absent" / "liens.txt")
-    with pytest.raises(DorkintError, match="Impossible"):
-        sauvegarder("x", tmp_path, ecraser=True)
+def test_save_invalid_path(tmp_path: Path) -> None:
+    with pytest.raises(DorkintError, match="Cannot write"):
+        save("x", tmp_path / "absent" / "liens.txt")
+    with pytest.raises(DorkintError, match="Cannot write"):
+        save("x", tmp_path, overwrite=True)

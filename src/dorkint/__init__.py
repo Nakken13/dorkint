@@ -1,3 +1,3 @@
-"""dorkint : générateur de Google dorks pour la reconnaissance OSINT."""
+"""dorkint: Google dork generator for OSINT reconnaissance."""
 
 __version__ = "0.1.0"

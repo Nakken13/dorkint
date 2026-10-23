@@ -36,8 +36,8 @@ def test_info_lists_every_mode_category_and_pattern() -> None:
 
 def test_info_flags_templates_needing_refinements() -> None:
     result = runner.invoke(app, ["--info"])
-    assert "{principal} {city}  [--city]" in result.output
-    assert "{local} site:{domaine:raw}  [local, domaine]" in result.output
+    assert "{primary} {city}  [--city]" in result.output
+    assert "{local} site:{domain:raw}  [local, domain]" in result.output
 
 
 def test_help_lists_every_mode() -> None:
@@ -47,25 +47,19 @@ def test_help_lists_every_mode() -> None:
         assert mode in result.output
 
 
-def test_no_args_shows_help_and_fails() -> None:
-    result = runner.invoke(app, [])
+def test_unknown_mode_error() -> None:
+    result = runner.invoke(app, ["unknown", "x"])
     assert result.exit_code != 0
-    assert "Usage" in result.output
-
-
-def test_unknown_mode_error_in_french() -> None:
-    result = runner.invoke(app, ["inconnu", "x"])
-    assert result.exit_code != 0
-    assert "Mode inconnu" in result.output
-    assert "inconnu" in result.output
+    assert "Unknown mode" in result.output
+    assert "unknown" in result.output
 
 
 @pytest.mark.parametrize("mode", MODES)
-def test_missing_value_error_in_french(mode: str) -> None:
+def test_missing_value_error(mode: str) -> None:
     result = runner.invoke(app, [mode])
     assert result.exit_code != 0
-    assert "valeur" in result.output.lower()
-    assert "manquant" in result.output.lower()
+    assert "value" in result.output.lower()
+    assert "missing" in result.output.lower()
 
 
 def test_registered_modes_match_cli_modes() -> None:
@@ -84,34 +78,34 @@ def test_mode_prints_clickable_google_links_by_category(mode: str) -> None:
 
 
 def test_refinement_adds_links() -> None:
-    sans = runner.invoke(app, ["fullname", "Jean Dupont"]).output
-    avec = runner.invoke(app, ["fullname", "Jean Dupont", "--city", "Lyon"]).output
-    assert avec.count("https://") > sans.count("https://")
-    assert "Lyon" in avec
+    without_city = runner.invoke(app, ["fullname", "Jean Dupont"]).output
+    with_city = runner.invoke(app, ["fullname", "Jean Dupont", "--city", "Lyon"]).output
+    assert with_city.count("https://") > without_city.count("https://")
+    assert "Lyon" in with_city
 
 
 def test_unsupported_refinement_is_a_clean_error() -> None:
     result = runner.invoke(app, ["city", "Lyon", "--city", "Paris"])
     assert result.exit_code == 2
-    assert "affinage" in result.output
+    assert "refinement" in result.output
 
 
 def test_out_saves_links_and_refuses_to_overwrite(tmp_path: Path) -> None:
-    cible = tmp_path / "liens.txt"
-    result = runner.invoke(app, ["username", "jdupont", "--out", str(cible)])
+    target = tmp_path / "liens.txt"
+    result = runner.invoke(app, ["username", "jdupont", "--out", str(target)])
     assert result.exit_code == 0
-    assert "https://www.google.com/search?q=" in cible.read_text(encoding="utf-8")
-    again = runner.invoke(app, ["username", "jdupont", "--out", str(cible)])
+    assert "https://www.google.com/search?q=" in target.read_text(encoding="utf-8")
+    again = runner.invoke(app, ["username", "jdupont", "--out", str(target)])
     assert again.exit_code == 2
-    assert "existe déjà" in again.output
-    forced = runner.invoke(app, ["username", "jdupont", "--out", str(cible), "--force"])
+    assert "already exists" in again.output
+    forced = runner.invoke(app, ["username", "jdupont", "--out", str(target), "--force"])
     assert forced.exit_code == 0
 
 
 def test_out_invalid_path_is_a_clean_error(tmp_path: Path) -> None:
     result = runner.invoke(app, ["username", "jdupont", "--out", str(tmp_path / "x" / "y.txt")])
     assert result.exit_code == 2
-    assert "Impossible" in result.output
+    assert "Cannot write" in result.output
 
 
 def test_blank_value_is_rejected() -> None:
@@ -138,3 +132,15 @@ def test_options_still_work_after_unquoted_words() -> None:
     result = runner.invoke(app, ["fullname", "john", "doe", "--city", "Lyon"])
     assert result.exit_code == 0
     assert "%22john+doe%22+%22Lyon%22" in result.output
+
+
+def test_keyword_option_is_appended_to_every_dork() -> None:
+    result = runner.invoke(app, ["username", "kalira", "--keyword", "minecraft"])
+    assert result.exit_code == 0
+    dorks = [l.strip() for l in result.output.splitlines() if "kalira" in l]
+    assert dorks and all(l.endswith('%22minecraft%22') for l in dorks)
+
+
+def test_keyword_forbidden_term_exits_2() -> None:
+    result = runner.invoke(app, ["username", "kalira", "--keyword", "password"])
+    assert result.exit_code == 2

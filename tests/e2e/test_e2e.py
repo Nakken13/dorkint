@@ -1,4 +1,4 @@
-"""Tests de bout en bout : vrai processus `python -m dorkint`, réseau interdit."""
+"""End-to-end tests: real `python -m dorkint` process, network forbidden."""
 
 import os
 import subprocess
@@ -9,16 +9,16 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 
 SRC = Path(__file__).resolve().parents[2] / "src"
-# Lance dorkint après avoir fait échouer toute connexion réseau.
+# Runs dorkint after making every network connection fail.
 NO_NETWORK = (
     "import socket, runpy, sys\n"
-    "def _blocked(*a, **k): raise RuntimeError('acces reseau interdit')\n"
+    "def _blocked(*a, **k): raise RuntimeError('network access forbidden')\n"
     "socket.socket.connect = _blocked\n"
     "socket.create_connection = _blocked\n"
     "sys.argv[0] = 'dorkint'\n"
     "runpy.run_module('dorkint', run_name='__main__')\n"
 )
-VALEURS = {
+VALUES = {
     "fullname": "Jean Dupont",
     "username": "jdupont",
     "city": "Lyon",
@@ -29,7 +29,7 @@ VALEURS = {
 }
 
 
-def lancer(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+def run_dorkint(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     env = {**os.environ, "PYTHONPATH": str(SRC), "PYTHONIOENCODING": "utf-8"}
     return subprocess.run(
         [sys.executable, "-c", NO_NETWORK, *args],
@@ -38,12 +38,12 @@ def lancer(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[s
 
 
 def urls(sortie: str) -> list[str]:
-    return [ligne for ligne in sortie.splitlines() if ligne.startswith("http")]
+    return [line for line in sortie.splitlines() if line.startswith("http")]
 
 
-@pytest.mark.parametrize(("mode", "valeur"), VALEURS.items())
-def test_mode_outputs_decodable_google_urls(mode: str, valeur: str) -> None:
-    result = lancer(mode, valeur)
+@pytest.mark.parametrize(("mode", "value"), VALUES.items())
+def test_mode_outputs_decodable_google_urls(mode: str, value: str) -> None:
+    result = run_dorkint(mode, value)
     assert result.returncode == 0, result.stderr
     liens = urls(result.stdout)
     assert liens
@@ -52,37 +52,37 @@ def test_mode_outputs_decodable_google_urls(mode: str, valeur: str) -> None:
         assert (parsed.scheme, parsed.netloc, parsed.path) == ("https", "www.google.com", "/search")
         assert parse_qs(parsed.query)["q"][0].strip()
     requetes = [parse_qs(urlparse(l).query)["q"][0] for l in liens]
-    cle = valeur if mode == "site" else f'"{valeur}"'
+    cle = value if mode == "site" else f'"{value}"'
     assert any(cle in q for q in requetes)
 
 
 def test_refinements_cross_variants() -> None:
-    base = urls(lancer("fullname", "Jean Dupont").stdout)
-    affine = urls(lancer("fullname", "Jean Dupont", "--city", "Lyon", "--company", "Acme").stdout)
+    base = urls(run_dorkint("fullname", "Jean Dupont").stdout)
+    affine = urls(run_dorkint("fullname", "Jean Dupont", "--city", "Lyon", "--company", "Acme").stdout)
     assert len(affine) > len(base)
     assert any("%22Lyon%22" in l and "%22Acme%22" in l for l in affine)
 
 
 def test_out_file_and_overwrite_protection(tmp_path: Path) -> None:
-    assert lancer("username", "jdupont", "--out", "liens.txt", cwd=tmp_path).returncode == 0
+    assert run_dorkint("username", "jdupont", "--out", "liens.txt", cwd=tmp_path).returncode == 0
     contenu = (tmp_path / "liens.txt").read_text(encoding="utf-8")
     assert urls(contenu)
-    refus = lancer("username", "jdupont", "--out", "liens.txt", cwd=tmp_path)
-    assert refus.returncode == 2
-    assert "existe déjà" in refus.stderr
-    assert lancer("username", "jdupont", "--out", "liens.txt", "--force", cwd=tmp_path).returncode == 0
+    refusal = run_dorkint("username", "jdupont", "--out", "liens.txt", cwd=tmp_path)
+    assert refusal.returncode == 2
+    assert "already exists" in refusal.stderr
+    assert run_dorkint("username", "jdupont", "--out", "liens.txt", "--force", cwd=tmp_path).returncode == 0
 
 
 @pytest.mark.parametrize(
     ("args", "message"),
     [
-        (["inconnu", "x"], "Mode inconnu"),
-        (["email"], "valeur principale manquante"),
-        (["city", "Lyon", "--city", "Paris"], "affinage"),
+        (["unknown", "x"], "Unknown mode"),
+        (["email"], "missing primary value"),
+        (["city", "Lyon", "--city", "Paris"], "refinement"),
     ],
 )
 def test_argument_errors(args: list[str], message: str) -> None:
-    result = lancer(*args)
+    result = run_dorkint(*args)
     assert result.returncode == 2
     assert message in result.stdout + result.stderr
 

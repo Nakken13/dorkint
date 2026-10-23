@@ -1,71 +1,79 @@
-# Avertissement et usage responsable
+# Disclaimer and responsible use
 
-## Ce que fait dorkint
+## What dorkint does
 
-dorkint est un générateur de requêtes de recherche. Il n'exécute aucune
-recherche, n'effectue aucune requête réseau, ne collecte, ne stocke ni ne
-transmet aucune donnée. Il construit des liens de recherche que vous ouvrez
-vous-même dans votre navigateur.
+dorkint is a search query generator. It runs no search, makes no network
+request, and does not collect, store or transmit any data. It builds search
+links that you open yourself in your browser.
 
-## Cibles autorisées uniquement
+## Authorized targets only
 
-Usage réservé à des cibles que vous êtes autorisé à examiner : vous-même, une
-personne ayant donné son consentement, ou une organisation dans le cadre d'un
-audit ou d'une mission légitime et documentée.
+For use only on targets you are authorized to examine: yourself, a person who
+has given consent, or an organization as part of a legitimate, documented audit
+or engagement.
 
-Il est interdit d'utiliser dorkint pour harceler, traquer, surveiller,
-intimider, usurper l'identité d'une personne, ou publier ses informations
-personnelles (doxxing). Voir notamment les articles 226-1 et suivants et
-222-33-2-2 et suivants du Code pénal (à vérifier sur Légifrance).
+Using dorkint to harass, stalk, monitor, intimidate or impersonate a person, or
+to publish their personal information (doxxing), is forbidden. See in
+particular articles 226-1 et seq. and 222-33-2-2 et seq. of the French Penal
+Code (to be checked on Légifrance).
 
-## Données personnelles (RGPD)
+## Personal data (GDPR)
 
-Rechercher des informations sur une personne identifiable constitue un
-traitement de données à caractère personnel au sens du RGPD. En tant
-qu'utilisateur, vous êtes seul responsable de la licéité de cet usage (base
-légale, finalité, minimisation, durée de conservation, information des
-personnes) et du respect de la loi française et européenne.
+Searching for information about an identifiable person is processing of
+personal data within the meaning of the GDPR. As the user, you alone are
+responsible for the lawfulness of that use (legal basis, purpose, minimization,
+retention period, informing the people concerned) and for complying with
+French and European law.
 
-Le fichier produit par `--out` contient les valeurs que vous avez saisies : il
-reste sous votre responsabilité.
+The file produced by `--out` contains the values you entered: it remains your
+responsibility.
 
-Les personnes concernées peuvent exercer leurs droits (opposition, effacement,
-déréférencement) auprès des sites sources et des moteurs de recherche, pas
-auprès de l'auteur, qui ne détient aucune donnée.
+Data subjects can exercise their rights (objection, erasure, delisting) with
+the source websites and the search engines, not with the author, who holds no
+data.
 
-## Pas de credentials
+## No credentials
 
-dorkint ne génère volontairement aucune requête visant des identifiants, mots
-de passe, clés ou fichiers de configuration sensibles. Un garde-fou
-(`src/dorkint/guardrails.py`) rejette ces termes et un test échoue si un mode en
-contient. Les accès frauduleux à un système de traitement automatisé de données
-sont réprimés par les articles 323-1 et suivants du Code pénal.
+dorkint deliberately generates no query aimed at credentials, passwords, keys
+or sensitive configuration files across the web. A guardrail
+(`src/dorkint/guardrails.py`) rejects these terms and a test fails if a mode
+contains any.
 
-## Périmètre
+The single exception: mode `site`, which audits one domain you are authorized
+to examine, may expose a handful of templates that check for that domain's own
+leaked secrets (`filetype:env`, `wp-config`, password-named log files...). Each
+such template is explicitly opted in (`allow_credentials=True`) and is itself
+anchored to `site:<domain>` — it can never run as a web-wide search. This is
+surface self-audit of the authorized target, not third-party credential
+hunting. Fraudulent access
+to an automated data processing system is punished by articles 323-1 et seq. of
+the French Penal Code.
 
-Le périmètre est limité à la France (sources et plateformes françaises). Aucune
-garantie n'est donnée pour d'autres juridictions.
+## Scope
 
-## Fiabilité des résultats
+The scope is limited to France (French sources and platforms). No guarantee is
+given for other jurisdictions.
 
-Les résultats des moteurs de recherche peuvent être inexacts, obsolètes ou
-concerner des homonymes. Ne prenez aucune décision ni action à l'égard d'une
-personne sur cette seule base.
+## Reliability of results
 
-## Moteurs de recherche tiers
+Search engine results can be inaccurate, outdated or concern people with the
+same name. Do not make any decision or take any action regarding a person on
+this basis alone.
 
-Les moteurs de recherche tiers ont leurs propres conditions d'utilisation, que
-vous devez respecter. dorkint n'est affilié à aucun moteur de recherche.
-« Google » est une marque de Google LLC.
+## Third-party search engines
 
-## Garantie
+Third-party search engines have their own terms of use, which you must comply
+with. dorkint is not affiliated with any search engine. "Google" is a trademark
+of Google LLC.
 
-Logiciel fourni « tel quel », sans garantie d'aucune sorte, expresse ou
-implicite, notamment d'exactitude, d'exhaustivité ou d'adaptation à un usage
-particulier. L'auteur ne saurait être tenu responsable des dommages résultant
-de son utilisation, dans les limites permises par la loi.
+## Warranty
 
-## Signalement
+Software provided "as is", without warranty of any kind, express or implied,
+including accuracy, completeness or fitness for a particular purpose. The
+author cannot be held liable for damages resulting from its use, to the extent
+permitted by law.
 
-Pour signaler un abus, ouvrez une issue sur le dépôt. Les contributions visant
-des credentials ou des cibles hors périmètre sont refusées.
+## Reporting
+
+To report abuse, open an issue on the repository. Contributions aimed at
+credentials or at targets outside the scope are rejected.

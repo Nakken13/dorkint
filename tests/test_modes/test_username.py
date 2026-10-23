@@ -1,15 +1,15 @@
 import re
 
-from dorkint.builder import generer, get_mode
+from dorkint.builder import generate, get_mode
 
 FORBIDDEN = ("password", "passwd", "mot de passe", "secret", "token", "api_key", ".env", "credentials", "id_rsa", "dump")
 EXPECTED_CATEGORIES = {
-    "Profils réseaux sociaux",
-    "Forums et communautés",
-    "Code et dépôts",
-    "Portfolios et blogs",
-    "Mentions dans des PDF",
-    "Mentions presse",
+    "Social network profiles",
+    "Forums and communities",
+    "Code and repositories",
+    "Portfolios and blogs",
+    "Mentions in PDFs",
+    "Press mentions",
 }
 
 
@@ -20,33 +20,33 @@ def test_mode_registered_with_refinements() -> None:
 
 
 def test_each_category_has_at_least_one_dork() -> None:
-    result = generer("username", "jdupont42", {})
+    result = generate("username", "jdupont42", {})
     assert EXPECTED_CATEGORIES <= set(result)
     assert all(result[name] for name in EXPECTED_CATEGORIES)
 
 
 def test_main_value_injected_and_quoted() -> None:
-    result = generer("username", "jdupont42", {})
+    result = generate("username", "jdupont42", {})
     for dorks in result.values():
         for dork in dorks:
             assert '"jdupont42"' in dork.query
 
 
 def test_social_platforms_covered() -> None:
-    queries = " ".join(d.query for d in generer("username", "x1", {})["Profils réseaux sociaux"])
+    queries = " ".join(d.query for d in generate("username", "x1", {})["Social network profiles"])
     for site in ("github.com", "x.com", "twitter.com", "instagram.com", "tiktok.com", "reddit.com", "youtube.com", "linkedin.com", "twitch.tv"):
         assert f"site:{site}" in queries
 
 
 def test_pdf_and_french_sources() -> None:
-    result = generer("username", "x1", {})
-    assert all("filetype:pdf" in d.query for d in result["Mentions dans des PDF"])
-    assert any("site:.fr" in d.query or ".fr" in d.query for d in result["Mentions presse"])
+    result = generate("username", "x1", {})
+    assert all("filetype:pdf" in d.query for d in result["Mentions in PDFs"])
+    assert any("site:.fr" in d.query or ".fr" in d.query for d in result["Press mentions"])
 
 
 def test_refinements_cross() -> None:
-    base = generer("username", "x1", {})
-    crossed = generer("username", "x1", {"city": "Lyon", "company": "Acme"})
+    base = generate("username", "x1", {})
+    crossed = generate("username", "x1", {"city": "Lyon", "company": "Acme"})
     count = lambda r: sum(len(v) for v in r.values())
     assert count(crossed) > count(base)
     queries = [d.query for v in crossed.values() for d in v]

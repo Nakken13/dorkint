@@ -8,24 +8,19 @@ TITRE = r" |___/\___/_| |_\_\_|_||_\__|"
 
 
 def test_banner_fits_a_terminal() -> None:
-    texte = banner()
-    assert max(len(ligne) for ligne in texte.splitlines()) <= 80
+    text = banner()
+    assert max(len(line) for line in text.splitlines()) <= 80
 
 
 def test_banner_has_an_eye_above_the_big_title() -> None:
-    lignes = banner().splitlines()
-    assert len(lignes) == 13
-    assert "⣿" in lignes[3]
-    assert lignes[-1].strip() == TITRE.strip()
+    lines = banner().splitlines()
+    assert len(lines) == 13
+    assert "⣿" in lines[3]
+    assert lines[-1].strip() == TITRE.strip()
 
 
 def test_help_shows_banner() -> None:
     result = runner.invoke(app, ["--help"])
-    assert TITRE in result.output
-
-
-def test_no_args_shows_banner() -> None:
-    result = runner.invoke(app, [])
     assert TITRE in result.output
 
 

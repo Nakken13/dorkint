@@ -1,1 +1,1 @@
-"""Un module par mode ; chacun appelle `register(Mode(...))` à l'import."""
+"""One module per mode; each calls `register(Mode(...))` on import."""

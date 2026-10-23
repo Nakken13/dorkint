@@ -1,76 +1,89 @@
 # dorkint
 
-Générateur de Google dorks pour la reconnaissance OSINT. Vous donnez une
-valeur (nom, pseudo, site, mail...), dorkint affiche des liens de recherche
-prêts à ouvrir (ctrl+clic dans le terminal), classés par catégorie.
+Google dork generator for OSINT reconnaissance. You give it a value (name,
+username, site, email...) and dorkint prints ready-to-open search links
+(ctrl+click in the terminal), grouped by category.
 
-dorkint **n'exécute aucune recherche** et ne fait aucune requête réseau : il
-construit seulement des URL.
+dorkint **runs no search** and makes no network request: it only builds URLs.
 
-## Usage responsable
+## Responsible use
 
-Réservé à des cibles que vous êtes autorisé à examiner (vous-même, une personne
-consentante, un audit légitime). Aucun dork visant des identifiants, mots de
-passe ou fichiers de configuration sensibles n'est généré, et le registre les
-refuse. Lisez [DISCLAIMER.md](DISCLAIMER.md) avant utilisation.
+Reserved for targets you are authorized to examine (yourself, a consenting
+person, a legitimate audit). No dork aimed at credentials, passwords or
+sensitive configuration files is generated, and the registry rejects them.
+Read [DISCLAIMER.md](DISCLAIMER.md) before use.
 
 ## Installation
 
-Python 3.11 ou plus.
+Python 3.11 or later.
 
 ```bash
-pip install .          # ou : pipx install .
+pip install .          # or: pipx install .
 ```
 
-Pour développer : `pip install -e .[dev]`.
+For development: `pip install -e .[dev]`.
 
-## Utilisation
+## Usage
 
 ```bash
-dorkint <mode> <value...> [--city CITY] [--company COMPANY] [--out FICHIER] [--force]
+dorkint <mode> <value...> [--city CITY] [--company COMPANY] [--keyword WORD] [--out FILE] [--force]
 ```
 
-| Mode | Valeur principale | Affinages |
-|------|-------------------|-----------|
-| `fullname` | « Jean Dupont » | `--city`, `--company` |
-| `username` | pseudo | `--city`, `--company` |
-| `city` | nom de ville | `--company` |
-| `site` | domaine (`exemple.fr`) | `--company` |
-| `email` | adresse mail | `--city`, `--company` |
-| `phone` | numéro français | `--city`, `--company` |
-| `company` | raison sociale ou SIREN | `--city` |
+| Mode | Primary value | Refinements |
+|------|---------------|-------------|
+| `fullname` | "John Smith" | `--city`, `--company` |
+| `username` | username | `--city`, `--company` |
+| `city` | city name | `--company` |
+| `site` | domain (`example.fr`) | `--company` |
+| `email` | email address | `--city`, `--company` |
+| `phone` | French number | `--city`, `--company` |
+| `company` | company name or SIREN | `--city` |
 
-Exemples (valeurs fictives) :
+Examples (fictional values):
 
 ```bash
-dorkint fullname Jean Dupont --city Lyon     # guillemets facultatifs
-dorkint site exemple.fr
-dorkint company "Acme" --out liens.txt
+dorkint fullname John Smith --city Lyon      # quotes optional
+dorkint site example.fr
+dorkint company "Acme" --out links.txt
 ```
 
-La sortie est une liste d'URL, une par ligne, sous des en-têtes `## Catégorie`.
-`--out` sauvegarde dans un fichier et refuse d'écraser un fichier existant sans
-`--force`. Les erreurs d'arguments retournent le code 2.
+The output is a list of URLs, one per line, under `## Category` headers.
+`--out` saves to a file and refuses to overwrite an existing file without
+`--force`. Argument errors return exit code 2.
 
-`dorkint --info` liste les patrons de dorks de chaque mode, par catégorie, sans rien
-générer. Un suffixe entre crochets indique ce qu'un patron exige : un affinage
-(`[--city]`) ou une valeur dérivée de la valeur principale (`[local, domaine]`).
+`dorkint --info` lists the dork patterns of each mode, by category, without
+generating anything. A bracketed suffix shows what a pattern requires: a
+refinement (`[--city]`) or a value derived from the primary value
+(`[local, domain]`).
 
-## Périmètre et limites
+`--keyword` adds a quoted keyword to every dork to cross-reference
+information (`dorkint username kalira --keyword minecraft`).
 
-- France uniquement pour l'instant (Infogreffe, societe.com, Pages Jaunes,
-  data.gouv.fr, BODACC, Journal Officiel...).
-- Le mode `phone` cherche les 5 écritures usuelles d'un numéro français ; le mode `email` cherche aussi la partie locale et le domaine séparément.
-- Les résultats de Google peuvent être inexacts ou concerner des homonymes.
+### Interactive version (menus)
 
-## Ajouter un mode
+`dorkint` alone (or `dorkint-tool`) opens numbered menus: pick the mode with
+`1`, `2`, `3`..., enter the value, then the refinements and the keyword (ENTER
+skips a field). `0` goes back; after the results you can save the links or run
+another search in the same mode. Same engine as the flag-based CLI; it needs an
+interactive terminal. Use `dorkint --help` for the help.
 
-Un fichier `src/dorkint/modes/<mode>.py` appelle `register(Mode(...))` : il est
-découvert automatiquement, sans éditer de fichier partagé. Détails et exemple
-dans [AGENTS.md](AGENTS.md) (« Déclarer un mode ») et
+## Scope and limits
+
+- France only for now (Infogreffe, societe.com, Pages Jaunes, data.gouv.fr,
+  BODACC, Journal Officiel...). The dork patterns therefore contain French
+  sites and French search words on purpose.
+- The `phone` mode searches the 5 usual spellings of a French number; the
+  `email` mode also searches the local part and the domain separately.
+- Google results can be inaccurate or concern people with the same name.
+
+## Adding a mode
+
+A file `src/dorkint/modes/<mode>.py` calls `register(Mode(...))`: it is
+discovered automatically, with no shared file to edit. Details and an example
+in [AGENTS.md](AGENTS.md) ("Declaring a mode") and
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Développement
+## Development
 
 ```bash
 python -m pytest -q     # tests
@@ -78,6 +91,6 @@ ruff check .            # lint
 mypy src                # types
 ```
 
-## Licence
+## License
 
 [MIT](LICENSE).

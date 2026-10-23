@@ -1,46 +1,46 @@
-# ADR 0001 — Choix de la stack
+# ADR 0001 — Stack choice
 
-Statut : accepté (2026-10-23)
+Status: accepted (2026-10-23)
 
-## Décision
+## Decision
 
-Python (>= 3.11) pour dorkint.
+Python (>= 3.11) for dorkint.
 
-## Contexte
+## Context
 
-dorkint génère des requêtes Google dorks (manipulation de chaînes, aucun
-réseau) et affiche des liens cliquables dans le terminal. Projet solo, open
-source, pièce de portfolio cyber. Candidats : C++, Python, Java.
+dorkint generates Google dork queries (string manipulation, no network) and
+prints clickable links in the terminal. Solo, open-source project, cyber
+portfolio piece. Candidates: C++, Python, Java.
 
-## Raisons
+## Reasons
 
-1. Le problème est du texte : `urllib.parse.quote_plus` (stdlib) couvre
-   l'encodage URL ; C++ n'a pas d'équivalent stdlib.
-2. Aucune toolchain à installer (JDK + Gradle ou MSVC + CMake sinon).
-3. L'écosystème OSINT/sécurité est surtout en Python (theHarvester, sherlock,
-   Recon-ng) : le dépôt est lisible pour un recruteur cyber.
-4. Distribution : `pipx install dorkint` / `uv tool install dorkint`.
-5. Liens cliquables (OSC 8) gérés par `rich`.
+1. The problem is text: `urllib.parse.quote_plus` (stdlib) covers URL
+   encoding; C++ has no stdlib equivalent.
+2. No toolchain to install (otherwise JDK + Gradle or MSVC + CMake).
+3. The OSINT/security ecosystem is mostly Python (theHarvester, sherlock,
+   Recon-ng): the repository is readable for a cyber recruiter.
+4. Distribution: `pipx install dorkint` / `uv tool install dorkint`.
+5. Clickable links (OSC 8) handled by `rich`.
 
-## Alternatives rejetées
+## Rejected alternatives
 
-- **C++** : aucun gain de performance ici, toolchain et packaging lourds.
-- **Java** : verbeux, JDK + Gradle imposés, pas d'écosystème OSINT.
-- **Rust/Go** : pas de domination claire, courbe d'apprentissage pour un solo.
+- **C++**: no performance gain here, heavy toolchain and packaging.
+- **Java**: verbose, JDK + Gradle required, no OSINT ecosystem.
+- **Rust/Go**: no clear advantage, learning curve for a solo developer.
 
-## Outils
+## Tools
 
-| Rôle | Outil |
-|------|-------|
-| Packaging | `pyproject.toml` (PEP 621), backend `hatchling` |
-| CLI | `typer` (embarque `rich`) |
-| Tests | `pytest` (+ `typer.testing.CliRunner` pour le CLI) |
+| Role | Tool |
+|------|------|
+| Packaging | `pyproject.toml` (PEP 621), `hatchling` backend |
+| CLI | `typer` (bundles `rich`) |
+| Tests | `pytest` (+ `typer.testing.CliRunner` for the CLI) |
 | Lint/format | `ruff` |
 | Types | `mypy --strict` |
 | CI | GitHub Actions (Windows + Linux) |
 
-Version minimale : 3.11 (version installée sur la machine de dev ; 3.12+
-recommandé par l'architecte mais non requis).
+Minimum version: 3.11 (version installed on the dev machine; 3.12+ recommended
+by the architect but not required).
 
 ## Structure
 

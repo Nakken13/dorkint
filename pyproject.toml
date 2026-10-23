@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "dorkint"
 version = "0.1.0"
-description = "Générateur de Google dorks pour la reconnaissance OSINT (aucune recherche exécutée)."
+description = "Google dork generator for OSINT reconnaissance (no search is run)."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
@@ -16,6 +16,7 @@ dev = ["pytest>=8", "ruff", "mypy"]
 
 [project.scripts]
 dorkint = "dorkint.cli:main"
+dorkint-tool = "dorkint.tui:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/dorkint"]

@@ -1,14 +1,14 @@
 import pytest
 
-from dorkint.builder import generer, get_mode
+from dorkint.builder import generate, get_mode
 
 CATEGORIES = (
-    "Registres FR",
-    "data.gouv.fr et Journal Officiel / BODACC",
-    "Offres d'emploi",
-    "Presse et réseaux sociaux",
-    "Sous-domaines et fichiers exposés",
-    "Dirigeants et mandataires",
+    "FR registers",
+    "data.gouv.fr and Journal Officiel / BODACC",
+    "Job offers",
+    "Press and social networks",
+    "Subdomains and exposed files",
+    "Executives and officers",
 )
 FORBIDDEN = ("password", "passwd", "mot de passe", "secret", "token", "api_key", ".env", "credentials", "id_rsa", "dump")
 
@@ -23,17 +23,17 @@ def test_mode_registered() -> None:
 
 
 def test_every_category_has_dork() -> None:
-    result = generer("company", "Acme")
+    result = generate("company", "Acme")
     assert tuple(result) == CATEGORIES
     assert all(result[c] for c in CATEGORIES)
 
 
 def test_principal_quoted_everywhere() -> None:
-    assert all('"Acme"' in q for q in _all_queries(generer("company", "Acme")))
+    assert all('"Acme"' in q for q in _all_queries(generate("company", "Acme")))
 
 
 def test_siren_principal() -> None:
-    assert all('"552100554"' in q for q in _all_queries(generer("company", "552100554")))
+    assert all('"552100554"' in q for q in _all_queries(generate("company", "552100554")))
 
 
 @pytest.mark.parametrize(
@@ -46,18 +46,18 @@ def test_siren_principal() -> None:
     ],
 )
 def test_expected_sources(site: str) -> None:
-    assert any(site in q for q in _all_queries(generer("company", "Acme")))
+    assert any(site in q for q in _all_queries(generate("company", "Acme")))
 
 
 def test_city_refinement_crosses() -> None:
-    base = _all_queries(generer("company", "Acme"))
-    crossed = _all_queries(generer("company", "Acme", {"city": "Lyon"}))
+    base = _all_queries(generate("company", "Acme"))
+    crossed = _all_queries(generate("company", "Acme", {"city": "Lyon"}))
     assert len(crossed) > len(base)
     assert any('"Acme"' in q and '"Lyon"' in q for q in crossed)
     assert not any("Lyon" in q for q in base)
 
 
 def test_no_credentials_terms() -> None:
-    queries = _all_queries(generer("company", "Acme", {"city": "Lyon"}))
+    queries = _all_queries(generate("company", "Acme", {"city": "Lyon"}))
     for q in queries:
         assert not any(term in q.lower() for term in FORBIDDEN), q

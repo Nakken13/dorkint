@@ -1,4 +1,4 @@
-"""Mode `site` : reconnaissance de surface sur un domaine que l'on est autorisé à auditer."""
+"""Mode `site`: surface reconnaissance of a domain you are authorized to audit."""
 
 from dorkint.builder import Category, Mode, Template, register
 
@@ -8,59 +8,78 @@ register(
         refinements=("company",),
         categories=(
             Category(
-                "Sous-domaines",
+                "Subdomains",
                 (
-                    Template("site:*.{principal:raw} -www"),
-                    Template("site:*.*.{principal:raw} -www"),
+                    Template("site:*.{primary:raw} -www"),
+                    Template("site:*.*.{primary:raw} -www"),
                 ),
             ),
             Category(
-                "Pages de connexion et d'administration visibles",
+                "Visible login and admin pages",
                 (
-                    Template("site:{principal:raw} inurl:login"),
-                    Template("site:{principal:raw} inurl:admin"),
-                    Template("site:{principal:raw} intitle:\"espace client\" OR intitle:\"espace membre\""),
+                    Template("site:{primary:raw} inurl:login"),
+                    Template("site:{primary:raw} inurl:admin"),
+                    Template("site:{primary:raw} intitle:\"espace client\" OR intitle:\"espace membre\""),
                 ),
             ),
             Category(
-                "Documents exposés",
+                "Exposed documents",
                 (
-                    Template("site:{principal:raw} filetype:pdf"),
-                    Template("site:{principal:raw} filetype:doc OR filetype:docx"),
-                    Template("site:{principal:raw} filetype:xls OR filetype:xlsx"),
-                    Template("site:{principal:raw} filetype:ppt OR filetype:pptx"),
-                    Template('site:{principal:raw} filetype:pdf "confidentiel"'),
-                    Template('site:{principal:raw} filetype:pdf "usage interne"'),
+                    Template("site:{primary:raw} filetype:pdf"),
+                    Template("site:{primary:raw} filetype:doc OR filetype:docx"),
+                    Template("site:{primary:raw} filetype:xls OR filetype:xlsx"),
+                    Template("site:{primary:raw} filetype:ppt OR filetype:pptx"),
+                    Template('site:{primary:raw} filetype:pdf "confidentiel"'),
+                    Template('site:{primary:raw} filetype:pdf "usage interne"'),
                 ),
             ),
             Category(
-                "Listings de répertoires",
+                "Directory listings",
                 (
-                    Template('site:{principal:raw} intitle:"index of"'),
-                    Template('site:{principal:raw} intitle:"index of" "parent directory"'),
+                    Template('site:{primary:raw} intitle:"index of"'),
+                    Template('site:{primary:raw} intitle:"index of" "parent directory"'),
                 ),
             ),
             Category(
-                "Pages d'erreur et technologies",
+                "Sensitive files exposed on the site",
                 (
-                    Template('site:{principal:raw} "page not found" OR "page introuvable"'),
-                    Template('site:{principal:raw} "powered by"'),
-                    Template('site:{principal:raw} intitle:"erreur" OR intitle:"error"'),
+                    Template('site:{primary:raw} intitle:"index of" (filetype:sql OR filetype:log OR filetype:bak)'),
+                    Template('site:{primary:raw} (ext:git OR ext:svn) intitle:"index of"'),
+                    Template(
+                        'site:{primary:raw} filetype:env "DB_PASSWORD"',
+                        allow_credentials=True,
+                    ),
+                    Template(
+                        'site:{primary:raw} inurl:"wp-config" (filetype:txt OR filetype:bak)',
+                        allow_credentials=True,
+                    ),
+                    Template(
+                        'site:{primary:raw} filetype:log inurl:"password"',
+                        allow_credentials=True,
+                    ),
                 ),
             ),
             Category(
-                "Mentions ailleurs",
+                "Error pages and technologies",
                 (
-                    Template('-site:{principal:raw} "{principal:raw}"'),
-                    Template('-site:{principal:raw} "{principal:raw}" avis OR critiques'),
-                    Template('-site:{principal:raw} {principal} {company}', requires=("company",)),
+                    Template('site:{primary:raw} "page not found" OR "page introuvable"'),
+                    Template('site:{primary:raw} "powered by"'),
+                    Template('site:{primary:raw} intitle:"error" OR intitle:"error"'),
                 ),
             ),
             Category(
-                "Offres d'emploi",
+                "Mentions elsewhere",
                 (
-                    Template('site:{principal:raw} inurl:careers OR inurl:carrieres OR inurl:recrutement'),
-                    Template('site:{principal:raw} "offre d\'emploi" OR "nous recrutons"'),
+                    Template('-site:{primary:raw} "{primary:raw}"'),
+                    Template('-site:{primary:raw} "{primary:raw}" avis OR critiques'),
+                    Template('-site:{primary:raw} {primary} {company}', requires=("company",)),
+                ),
+            ),
+            Category(
+                "Job offers",
+                (
+                    Template('site:{primary:raw} inurl:careers OR inurl:carrieres OR inurl:recrutement'),
+                    Template('site:{primary:raw} "offre d\'emploi" OR "nous recrutons"'),
                     Template(
                         'site:linkedin.com/jobs OR site:indeed.fr {company}',
                         requires=("company",),
@@ -68,11 +87,11 @@ register(
                 ),
             ),
             Category(
-                "Presse",
+                "Press",
                 (
-                    Template('-site:{principal:raw} "{principal:raw}" presse OR communiqué'),
-                    Template('"{principal:raw}" intitle:interview OR intitle:article'),
-                    Template('{company} "{principal:raw}" actualités', requires=("company",)),
+                    Template('-site:{primary:raw} "{primary:raw}" presse OR communiqué'),
+                    Template('"{primary:raw}" intitle:interview OR intitle:article'),
+                    Template('{company} "{primary:raw}" actualités', requires=("company",)),
                 ),
             ),
         ),

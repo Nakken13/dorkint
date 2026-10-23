@@ -1,4 +1,4 @@
-"""Point d'entrée CLI : un sous-commande par mode de recherche."""
+"""CLI entry point: one subcommand per search mode."""
 
 import sys
 from pathlib import Path
@@ -10,18 +10,18 @@ from typer.core import TyperGroup
 
 from dorkint import __version__
 from dorkint.banner import banner
-from dorkint.builder import DorkintError, generer, get_mode
-from dorkint.output import formater, formater_info, sauvegarder
+from dorkint.builder import DorkintError, generate, get_mode
+from dorkint.output import format_dorks, format_info, save
 
 MODES = ("fullname", "username", "city", "site", "email", "phone", "company")
 
 
 class _ModeGroup(TyperGroup):
-    """Groupe racine : bannière dans l'aide, erreurs de mode inconnu en français."""
+    """Root group: banner in the help, unknown-mode errors."""
 
     def format_help(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
         if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(errors="replace")  # braille hors encodage console : pas de crash
+            sys.stdout.reconfigure(errors="replace")  # braille outside the console encoding: no crash
         typer.echo(typer.style(banner(), fg=typer.colors.CYAN))
         super().format_help(ctx, formatter)
 
@@ -31,7 +31,7 @@ class _ModeGroup(TyperGroup):
         name = args[0] if args else ""
         if name and not name.startswith("-") and self.get_command(ctx, name) is None:
             raise click.UsageError(
-                f"Mode inconnu : '{name}'. Modes disponibles : {', '.join(MODES)}.", ctx
+                f"Unknown mode: '{name}'. Available modes: {', '.join(MODES)}.", ctx
             )
         return super().resolve_command(ctx, args)
 
@@ -40,10 +40,10 @@ app = typer.Typer(
     cls=_ModeGroup,
     name="dorkint",
     help=(
-        "Génère des Google dorks pour la reconnaissance OSINT (aucune recherche exécutée). "
-        "Usage réservé à des cibles autorisées : voir DISCLAIMER.md."
+        "Generates Google dorks for OSINT reconnaissance (no search is run). "
+        "For authorized targets only: see DISCLAIMER.md."
     ),
-    no_args_is_help=True,
+    invoke_without_command=True,
     add_completion=False,
 )
 
@@ -56,52 +56,58 @@ def _show_version(value: bool) -> None:
 
 def _show_info(value: bool) -> None:
     if value:
-        typer.echo(formater_info([get_mode(m) for m in MODES]))
+        typer.echo(format_info([get_mode(m) for m in MODES]))
         raise typer.Exit()
 
 
 @app.callback()
 def _root(
+    ctx: typer.Context,
     version: Annotated[
-        bool, typer.Option("--version", callback=_show_version, is_eager=True, help="Affiche la version.")
+        bool, typer.Option("--version", callback=_show_version, is_eager=True, help="Show the version.")
     ] = False,
     info: Annotated[
         bool,
-        typer.Option("--info", callback=_show_info, is_eager=True, help="Liste les dorks (patrons) de chaque mode."),
+        typer.Option("--info", callback=_show_info, is_eager=True, help="List the dork patterns of each mode."),
     ] = False,
 ) -> None:
-    """Options globales."""
+    """Without a mode, opens the interactive menu."""
+    if ctx.invoked_subcommand is None:
+        from dorkint.tui import main as tui_main
+
+        tui_main()
 
 
 def _fail(message: str) -> NoReturn:
-    typer.echo(f"Erreur : {message}", err=True)
+    typer.echo(f"Error: {message}", err=True)
     raise typer.Exit(2)
 
 
 def _register(mode: str) -> None:
     def command(
         words: Annotated[
-            list[str] | None, typer.Argument(metavar="VALUE...", help="Valeur à rechercher (guillemets facultatifs).")
+            list[str] | None, typer.Argument(metavar="VALUE...", help="Value to search for (quotes optional).")
         ] = None,
-        city: Annotated[str | None, typer.Option(help="Ville connue (affinage).")] = None,
-        company: Annotated[str | None, typer.Option(help="Entreprise connue (affinage).")] = None,
-        out: Annotated[Path | None, typer.Option(help="Fichier où sauvegarder les liens.")] = None,
-        force: Annotated[bool, typer.Option("--force", help="Écrase le fichier --out s'il existe.")] = False,
+        city: Annotated[str | None, typer.Option(help="Known city (refinement).")] = None,
+        company: Annotated[str | None, typer.Option(help="Known company (refinement).")] = None,
+        keyword: Annotated[str | None, typer.Option(help="Keyword added to every dork (e.g. minecraft).")] = None,
+        out: Annotated[Path | None, typer.Option(help="File where the links are saved.")] = None,
+        force: Annotated[bool, typer.Option("--force", help="Overwrite the --out file if it exists.")] = False,
     ) -> None:
         if not words:
-            _fail(f"valeur principale manquante pour le mode '{mode}'.")
+            _fail(f"missing primary value for mode '{mode}'.")
         try:
-            groupes = generer(mode, " ".join(words), {"city": city, "company": company})
-            texte = formater(groupes)
+            groups = generate(mode, " ".join(words), {"city": city, "company": company}, keyword)
+            text = format_dorks(groups)
             if out:
-                sauvegarder(texte + "\n", out, ecraser=force)
-        except DorkintError as erreur:
-            _fail(str(erreur))
-        typer.echo(texte)
+                save(text + "\n", out, overwrite=force)
+        except DorkintError as error:
+            _fail(str(error))
+        typer.echo(text)
         if out:
-            typer.echo(f"\nLiens sauvegardés dans '{out}'.", err=True)
+            typer.echo(f"\nLinks saved to '{out}'.", err=True)
 
-    command.__doc__ = f"Mode « {mode} »."
+    command.__doc__ = f"Mode '{mode}'."
     app.command(name=mode)(command)
 
 

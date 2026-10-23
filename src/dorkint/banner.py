@@ -1,4 +1,4 @@
-"""Bannière (un oeil en braille et le nom `Dorkint`) affichée dans l'aide."""
+"""Banner (a braille eye and the name `Dorkint`) shown in the help."""
 
 import shutil
 
@@ -23,10 +23,10 @@ _TITLE = (
 
 
 def banner() -> str:
-    """Oeil puis `Dorkint`, centrés l'un sur l'autre."""
-    eye_largeur = max(len(ligne) for ligne in _EYE)
-    titre_largeur = max(len(ligne) for ligne in _TITLE)
+    """Eye then `Dorkint`, each centered on the terminal."""
+    eye_width = max(len(line) for line in _EYE)
+    title_width = max(len(line) for line in _TITLE)
     terminal = shutil.get_terminal_size((80, 24)).columns
-    lignes = [ligne.ljust(eye_largeur).center(terminal).rstrip() for ligne in _EYE]
-    lignes += [ligne.ljust(titre_largeur).center(terminal).rstrip() for ligne in _TITLE]
-    return "\n".join(lignes) + "\n"
+    lines = [line.ljust(eye_width).center(terminal).rstrip() for line in _EYE]
+    lines += [line.ljust(title_width).center(terminal).rstrip() for line in _TITLE]
+    return "\n".join(lines) + "\n"
