@@ -1,13 +1,15 @@
 """Point d'entrée CLI : un sous-commande par mode de recherche."""
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 import click
 import typer
 from typer.core import TyperGroup
 
 from dorkint import __version__
+from dorkint.builder import DorkintError, generer
+from dorkint.output import formater, sauvegarder
 
 MODES = ("nom-prenom", "username", "ville", "site", "mail", "tel", "entreprise")
 
@@ -50,17 +52,31 @@ def _root(
     """Options globales."""
 
 
+def _fail(message: str) -> NoReturn:
+    typer.echo(f"Erreur : {message}", err=True)
+    raise typer.Exit(2)
+
+
 def _register(mode: str) -> None:
     def command(
         valeur: Annotated[str | None, typer.Argument(help="Valeur principale à rechercher.")] = None,
         ville: Annotated[str | None, typer.Option(help="Ville connue (affinage).")] = None,
         entreprise: Annotated[str | None, typer.Option(help="Entreprise connue (affinage).")] = None,
         out: Annotated[Path | None, typer.Option(help="Fichier où sauvegarder les liens.")] = None,
+        force: Annotated[bool, typer.Option("--force", help="Écrase le fichier --out s'il existe.")] = False,
     ) -> None:
-        if not valeur:
-            typer.echo(f"Erreur : valeur principale manquante pour le mode '{mode}'.", err=True)
-            raise typer.Exit(2)
-        typer.echo(f"[{mode}] génération non implémentée pour '{valeur}'.")
+        if valeur is None:
+            _fail(f"valeur principale manquante pour le mode '{mode}'.")
+        try:
+            groupes = generer(mode, valeur, {"ville": ville, "entreprise": entreprise})
+            texte = formater(groupes)
+            if out:
+                sauvegarder(texte + "\n", out, ecraser=force)
+        except DorkintError as erreur:
+            _fail(str(erreur))
+        typer.echo(texte)
+        if out:
+            typer.echo(f"\nLiens sauvegardés dans '{out}'.", err=True)
 
     command.__doc__ = f"Mode « {mode} »."
     app.command(name=mode)(command)
