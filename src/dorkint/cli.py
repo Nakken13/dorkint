@@ -8,14 +8,19 @@ import typer
 from typer.core import TyperGroup
 
 from dorkint import __version__
+from dorkint.banner import banner
 from dorkint.builder import DorkintError, generer
 from dorkint.output import formater, sauvegarder
 
-MODES = ("nom-prenom", "username", "ville", "site", "mail", "tel", "entreprise")
+MODES = ("fullname", "username", "city", "site", "email", "phone", "company")
 
 
 class _ModeGroup(TyperGroup):
-    """Groupe dont les erreurs de mode inconnu sont en français."""
+    """Groupe racine : bannière dans l'aide, erreurs de mode inconnu en français."""
+
+    def format_help(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
+        typer.echo(typer.style(banner(), fg=typer.colors.CYAN))
+        super().format_help(ctx, formatter)
 
     def resolve_command(
         self, ctx: click.Context, args: list[str]
@@ -31,7 +36,10 @@ class _ModeGroup(TyperGroup):
 app = typer.Typer(
     cls=_ModeGroup,
     name="dorkint",
-    help="Génère des Google dorks pour la reconnaissance OSINT (aucune recherche exécutée). Usage réservé à des cibles autorisées : voir DISCLAIMER.md.",
+    help=(
+        "Génère des Google dorks pour la reconnaissance OSINT (aucune recherche exécutée). "
+        "Usage réservé à des cibles autorisées : voir DISCLAIMER.md."
+    ),
     no_args_is_help=True,
     add_completion=False,
 )
@@ -59,16 +67,16 @@ def _fail(message: str) -> NoReturn:
 
 def _register(mode: str) -> None:
     def command(
-        valeur: Annotated[str | None, typer.Argument(help="Valeur principale à rechercher.")] = None,
-        ville: Annotated[str | None, typer.Option(help="Ville connue (affinage).")] = None,
-        entreprise: Annotated[str | None, typer.Option(help="Entreprise connue (affinage).")] = None,
+        value: Annotated[str | None, typer.Argument(help="Valeur principale à rechercher.")] = None,
+        city: Annotated[str | None, typer.Option(help="Ville connue (affinage).")] = None,
+        company: Annotated[str | None, typer.Option(help="Entreprise connue (affinage).")] = None,
         out: Annotated[Path | None, typer.Option(help="Fichier où sauvegarder les liens.")] = None,
         force: Annotated[bool, typer.Option("--force", help="Écrase le fichier --out s'il existe.")] = False,
     ) -> None:
-        if valeur is None:
+        if value is None:
             _fail(f"valeur principale manquante pour le mode '{mode}'.")
         try:
-            groupes = generer(mode, valeur, {"ville": ville, "entreprise": entreprise})
+            groupes = generer(mode, value, {"city": city, "company": company})
             texte = formater(groupes)
             if out:
                 sauvegarder(texte + "\n", out, ecraser=force)

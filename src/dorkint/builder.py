@@ -17,7 +17,7 @@ class DorkintError(ValueError):
 
 @dataclass(frozen=True)
 class Template:
-    """Patron de requête ; `{principal}`, `{ville}`... sont insérés entre guillemets,
+    """Patron de requête ; `{principal}`, `{city}`... sont insérés entre guillemets,
     `{principal:raw}` tel quel. `requires` : affinages nécessaires pour générer ce patron."""
 
     pattern: str

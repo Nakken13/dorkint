@@ -19,13 +19,13 @@ NO_NETWORK = (
     "runpy.run_module('dorkint', run_name='__main__')\n"
 )
 VALEURS = {
-    "nom-prenom": "Jean Dupont",
+    "fullname": "Jean Dupont",
     "username": "jdupont",
-    "ville": "Lyon",
+    "city": "Lyon",
     "site": "exemple.fr",
-    "mail": "jean.dupont@exemple.fr",
-    "tel": "06 12 34 56 78",
-    "entreprise": "Acme",
+    "email": "jean.dupont@exemple.fr",
+    "phone": "06 12 34 56 78",
+    "company": "Acme",
 }
 
 
@@ -57,8 +57,8 @@ def test_mode_outputs_decodable_google_urls(mode: str, valeur: str) -> None:
 
 
 def test_refinements_cross_variants() -> None:
-    base = urls(lancer("nom-prenom", "Jean Dupont").stdout)
-    affine = urls(lancer("nom-prenom", "Jean Dupont", "--ville", "Lyon", "--entreprise", "Acme").stdout)
+    base = urls(lancer("fullname", "Jean Dupont").stdout)
+    affine = urls(lancer("fullname", "Jean Dupont", "--city", "Lyon", "--company", "Acme").stdout)
     assert len(affine) > len(base)
     assert any("%22Lyon%22" in l and "%22Acme%22" in l for l in affine)
 
@@ -77,8 +77,8 @@ def test_out_file_and_overwrite_protection(tmp_path: Path) -> None:
     ("args", "message"),
     [
         (["inconnu", "x"], "Mode inconnu"),
-        (["mail"], "valeur principale manquante"),
-        (["ville", "Lyon", "--ville", "Paris"], "affinage"),
+        (["email"], "valeur principale manquante"),
+        (["city", "Lyon", "--city", "Paris"], "affinage"),
     ],
 )
 def test_argument_errors(args: list[str], message: str) -> None:

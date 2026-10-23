@@ -8,14 +8,14 @@ from dorkint.builder import Category, Dork, DorkintError, Mode, Template, genere
 def fake_mode(monkeypatch: pytest.MonkeyPatch) -> Mode:
     mode = Mode(
         name="fake",
-        refinements=("ville", "entreprise"),
+        refinements=("city", "company"),
         categories=(
             Category("Base", (Template('site:exemple.fr {principal}'),)),
             Category(
                 "Croisé",
                 (
-                    Template("{principal} {ville}", requires=("ville",)),
-                    Template("{principal} {ville} {entreprise}", requires=("ville", "entreprise")),
+                    Template("{principal} {city}", requires=("city",)),
+                    Template("{principal} {city} {company}", requires=("city", "company")),
                 ),
             ),
             Category("Brut", (Template("site:{principal:raw}"),)),
@@ -40,13 +40,13 @@ def test_quotes_in_value_are_removed(fake_mode: Mode) -> None:
 
 def test_absent_refinement_gives_only_base_dorks(fake_mode: Mode) -> None:
     assert "Croisé" not in generer("fake", "Jean", {})
-    assert "Croisé" not in generer("fake", "Jean", {"ville": None, "entreprise": ""})
+    assert "Croisé" not in generer("fake", "Jean", {"city": None, "company": ""})
 
 
 def test_present_refinement_adds_cross_variants(fake_mode: Mode) -> None:
-    queries = [d.query for d in generer("fake", "Jean", {"ville": "Lyon"})["Croisé"]]
+    queries = [d.query for d in generer("fake", "Jean", {"city": "Lyon"})["Croisé"]]
     assert queries == ['"Jean" "Lyon"']
-    both = [d.query for d in generer("fake", "Jean", {"ville": "Lyon", "entreprise": "Acme"})["Croisé"]]
+    both = [d.query for d in generer("fake", "Jean", {"city": "Lyon", "company": "Acme"})["Croisé"]]
     assert both == ['"Jean" "Lyon"', '"Jean" "Lyon" "Acme"']
 
 
@@ -66,8 +66,8 @@ def test_unsupported_refinement_rejected(fake_mode: Mode) -> None:
 
 
 def test_template_with_undeclared_placeholder_rejected() -> None:
-    with pytest.raises(DorkintError, match="ville"):
-        Template("{principal} {ville}")
+    with pytest.raises(DorkintError, match="city"):
+        Template("{principal} {city}")
 
 
 def test_mode_without_categories_rejected() -> None:

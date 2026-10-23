@@ -4,8 +4,8 @@ from dorkint.builder import Category, Mode, Template, register
 
 register(
     Mode(
-        name="entreprise",
-        refinements=("ville",),
+        name="company",
+        refinements=("city",),
         categories=(
             Category(
                 "Registres FR",
@@ -15,8 +15,8 @@ register(
                     Template("site:pagesjaunes.fr {principal}"),
                     Template("site:pappers.fr {principal}"),
                     Template("site:annuaire-entreprises.data.gouv.fr {principal}"),
-                    Template("site:societe.com {principal} {ville}", requires=("ville",)),
-                    Template("site:pagesjaunes.fr {principal} {ville}", requires=("ville",)),
+                    Template("site:societe.com {principal} {city}", requires=("city",)),
+                    Template("site:pagesjaunes.fr {principal} {city}", requires=("city",)),
                 ),
             ),
             Category(
@@ -25,7 +25,7 @@ register(
                     Template("site:data.gouv.fr {principal}"),
                     Template("site:bodacc.fr {principal}"),
                     Template("site:journal-officiel.gouv.fr {principal}"),
-                    Template("site:bodacc.fr {principal} {ville}", requires=("ville",)),
+                    Template("site:bodacc.fr {principal} {city}", requires=("city",)),
                 ),
             ),
             Category(
@@ -35,7 +35,7 @@ register(
                     Template("site:indeed.fr {principal}"),
                     Template("site:linkedin.com/jobs {principal}"),
                     Template("site:apec.fr {principal}"),
-                    Template("site:indeed.fr {principal} {ville}", requires=("ville",)),
+                    Template("site:indeed.fr {principal} {city}", requires=("city",)),
                 ),
             ),
             Category(
@@ -45,7 +45,7 @@ register(
                     Template("site:facebook.com {principal}"),
                     Template("site:x.com {principal}"),
                     Template("{principal} actualité presse"),
-                    Template("{principal} {ville} actualité presse", requires=("ville",)),
+                    Template("{principal} {city} actualité presse", requires=("city",)),
                 ),
             ),
             Category(
@@ -54,7 +54,7 @@ register(
                     Template("{principal} filetype:pdf"),
                     Template("{principal} filetype:xlsx OR filetype:docx"),
                     Template("{principal} inurl:intranet OR inurl:extranet"),
-                    Template("{principal} {ville} filetype:pdf", requires=("ville",)),
+                    Template("{principal} {city} filetype:pdf", requires=("city",)),
                 ),
             ),
             Category(
@@ -63,7 +63,7 @@ register(
                     Template("{principal} dirigeant OR président OR gérant"),
                     Template("site:pappers.fr {principal} dirigeants"),
                     Template("site:linkedin.com/in {principal} fondateur OR directeur"),
-                    Template("{principal} {ville} dirigeant", requires=("ville",)),
+                    Template("{principal} {city} dirigeant", requires=("city",)),
                 ),
             ),
         ),

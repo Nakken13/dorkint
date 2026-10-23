@@ -28,44 +28,44 @@ def variantes_tel(numero: str) -> list[str]:
 
 
 register(Mode(
-    name="tel",
-    refinements=("ville", "entreprise"),
+    name="phone",
+    refinements=("city", "company"),
     variantes=variantes_tel,
     categories=(
         Category("Annuaires inversés", (
             Template("site:pagesjaunes.fr {principal}"),
             Template("site:118712.fr {principal}"),
-            Template("site:pagesjaunes.fr {principal} {ville}", requires=("ville",)),
-            Template("site:118712.fr {principal} {ville}", requires=("ville",)),
+            Template("site:pagesjaunes.fr {principal} {city}", requires=("city",)),
+            Template("site:118712.fr {principal} {city}", requires=("city",)),
         )),
         Category("Mentions web", (
             Template("{principal}"),
-            Template("{principal} {ville}", requires=("ville",)),
-            Template("{principal} {entreprise}", requires=("entreprise",)),
-            Template("{principal} {ville} {entreprise}", requires=("ville", "entreprise")),
+            Template("{principal} {city}", requires=("city",)),
+            Template("{principal} {company}", requires=("company",)),
+            Template("{principal} {city} {company}", requires=("city", "company")),
         )),
         Category("Réseaux sociaux", (
             Template("site:facebook.com {principal}"),
             Template("site:linkedin.com {principal}"),
             Template("site:twitter.com OR site:instagram.com {principal}"),
-            Template("site:linkedin.com {principal} {entreprise}", requires=("entreprise",)),
+            Template("site:linkedin.com {principal} {company}", requires=("company",)),
         )),
         Category("Annonces", (
             Template("site:leboncoin.fr {principal}"),
             Template("site:vinted.fr {principal}"),
-            Template("site:leboncoin.fr {principal} {ville}", requires=("ville",)),
+            Template("site:leboncoin.fr {principal} {city}", requires=("city",)),
         )),
         Category("Documents", (
             Template("filetype:pdf {principal}"),
             Template("filetype:doc OR filetype:docx {principal}"),
-            Template("filetype:pdf {principal} {ville}", requires=("ville",)),
-            Template("filetype:pdf {principal} {entreprise}", requires=("entreprise",)),
+            Template("filetype:pdf {principal} {city}", requires=("city",)),
+            Template("filetype:pdf {principal} {company}", requires=("company",)),
         )),
         Category("Sites d'entreprise", (
             Template("intext:contact {principal}"),
             Template("inurl:contact {principal}"),
-            Template("intext:contact {principal} {entreprise}", requires=("entreprise",)),
-            Template("inurl:contact {principal} {ville}", requires=("ville",)),
+            Template("intext:contact {principal} {company}", requires=("company",)),
+            Template("inurl:contact {principal} {city}", requires=("city",)),
         )),
     ),
 ))

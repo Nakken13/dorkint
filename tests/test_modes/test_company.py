@@ -18,22 +18,22 @@ def _all_queries(result: dict) -> list[str]:
 
 
 def test_mode_registered() -> None:
-    assert get_mode("entreprise").name == "entreprise"
-    assert "ville" in get_mode("entreprise").refinements
+    assert get_mode("company").name == "company"
+    assert "city" in get_mode("company").refinements
 
 
 def test_every_category_has_dork() -> None:
-    result = generer("entreprise", "Acme")
+    result = generer("company", "Acme")
     assert tuple(result) == CATEGORIES
     assert all(result[c] for c in CATEGORIES)
 
 
 def test_principal_quoted_everywhere() -> None:
-    assert all('"Acme"' in q for q in _all_queries(generer("entreprise", "Acme")))
+    assert all('"Acme"' in q for q in _all_queries(generer("company", "Acme")))
 
 
 def test_siren_principal() -> None:
-    assert all('"552100554"' in q for q in _all_queries(generer("entreprise", "552100554")))
+    assert all('"552100554"' in q for q in _all_queries(generer("company", "552100554")))
 
 
 @pytest.mark.parametrize(
@@ -46,18 +46,18 @@ def test_siren_principal() -> None:
     ],
 )
 def test_expected_sources(site: str) -> None:
-    assert any(site in q for q in _all_queries(generer("entreprise", "Acme")))
+    assert any(site in q for q in _all_queries(generer("company", "Acme")))
 
 
-def test_ville_refinement_crosses() -> None:
-    base = _all_queries(generer("entreprise", "Acme"))
-    crossed = _all_queries(generer("entreprise", "Acme", {"ville": "Lyon"}))
+def test_city_refinement_crosses() -> None:
+    base = _all_queries(generer("company", "Acme"))
+    crossed = _all_queries(generer("company", "Acme", {"city": "Lyon"}))
     assert len(crossed) > len(base)
     assert any('"Acme"' in q and '"Lyon"' in q for q in crossed)
     assert not any("Lyon" in q for q in base)
 
 
 def test_no_credentials_terms() -> None:
-    queries = _all_queries(generer("entreprise", "Acme", {"ville": "Lyon"}))
+    queries = _all_queries(generer("company", "Acme", {"city": "Lyon"}))
     for q in queries:
         assert not any(term in q.lower() for term in FORBIDDEN), q

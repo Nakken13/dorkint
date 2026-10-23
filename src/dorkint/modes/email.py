@@ -17,8 +17,8 @@ def _decouper(adresse: str) -> dict[str, str]:
 
 register(
     Mode(
-        name="mail",
-        refinements=("ville", "entreprise"),
+        name="email",
+        refinements=("city", "company"),
         derive=_decouper,
         derived=("local", "domaine"),
         categories=(
@@ -28,9 +28,9 @@ register(
                     Template("{principal}"),
                     Template("intext:{principal}"),
                     Template("{principal} contact"),
-                    Template("{principal} {ville}", requires=("ville",)),
-                    Template("{principal} {entreprise}", requires=("entreprise",)),
-                    Template("{principal} {entreprise} {ville}", requires=("entreprise", "ville")),
+                    Template("{principal} {city}", requires=("city",)),
+                    Template("{principal} {company}", requires=("company",)),
+                    Template("{principal} {company} {city}", requires=("company", "city")),
                 ),
             ),
             Category(
@@ -39,8 +39,8 @@ register(
                     Template("filetype:pdf {principal}"),
                     Template("filetype:doc OR filetype:docx {principal}"),
                     Template("filetype:xls OR filetype:xlsx OR filetype:ppt {principal}"),
-                    Template("filetype:pdf {principal} {entreprise}", requires=("entreprise",)),
-                    Template("filetype:pdf {principal} {ville}", requires=("ville",)),
+                    Template("filetype:pdf {principal} {company}", requires=("company",)),
+                    Template("filetype:pdf {principal} {city}", requires=("city",)),
                 ),
             ),
             Category(
@@ -49,8 +49,8 @@ register(
                     Template("site:linkedin.com {principal}"),
                     Template("site:facebook.com OR site:x.com OR site:instagram.com {principal}"),
                     Template("site:github.com OR site:gitlab.com {principal}"),
-                    Template("site:linkedin.com {principal} {entreprise}", requires=("entreprise",)),
-                    Template("site:linkedin.com OR site:facebook.com {principal} {ville}", requires=("ville",)),
+                    Template("site:linkedin.com {principal} {company}", requires=("company",)),
+                    Template("site:linkedin.com OR site:facebook.com {principal} {city}", requires=("city",)),
                 ),
             ),
             Category(
@@ -59,7 +59,7 @@ register(
                     Template("inurl:forum {principal}"),
                     Template("site:reddit.com OR site:stackoverflow.com {principal}"),
                     Template("intext:{principal} inurl:comment"),
-                    Template("inurl:forum {principal} {ville}", requires=("ville",)),
+                    Template("inurl:forum {principal} {city}", requires=("city",)),
                 ),
             ),
             Category(
@@ -69,8 +69,8 @@ register(
                     Template("intitle:annuaire {principal}"),
                     Template("{principal} cordialement"),
                     Template("{principal} tél mobile signature"),
-                    Template("site:pagesjaunes.fr {principal} {ville}", requires=("ville",)),
-                    Template("intitle:annuaire {principal} {entreprise}", requires=("entreprise",)),
+                    Template("site:pagesjaunes.fr {principal} {city}", requires=("city",)),
+                    Template("intitle:annuaire {principal} {company}", requires=("company",)),
                 ),
             ),
             Category(
@@ -79,7 +79,7 @@ register(
                     Template("{principal} communiqué de presse"),
                     Template("{principal} auteur publication"),
                     Template("site:hal.science OR site:researchgate.net {principal}"),
-                    Template("{principal} communiqué {entreprise}", requires=("entreprise",)),
+                    Template("{principal} communiqué {company}", requires=("company",)),
                 ),
             ),
             Category(
@@ -90,7 +90,7 @@ register(
                     Template("inurl:{principal}"),
                     Template("intitle:{principal}"),
                     Template("{principal} -site:linkedin.com -site:facebook.com"),
-                    Template("{principal} -site:linkedin.com {entreprise}", requires=("entreprise",)),
+                    Template("{principal} -site:linkedin.com {company}", requires=("company",)),
                 ),
             ),
         ),

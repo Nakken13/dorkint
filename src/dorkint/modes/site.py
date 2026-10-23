@@ -5,7 +5,7 @@ from dorkint.builder import Category, Mode, Template, register
 register(
     Mode(
         name="site",
-        refinements=("entreprise",),
+        refinements=("company",),
         categories=(
             Category(
                 "Sous-domaines",
@@ -53,7 +53,7 @@ register(
                 (
                     Template('-site:{principal:raw} "{principal:raw}"'),
                     Template('-site:{principal:raw} "{principal:raw}" avis OR critiques'),
-                    Template('-site:{principal:raw} {principal} {entreprise}', requires=("entreprise",)),
+                    Template('-site:{principal:raw} {principal} {company}', requires=("company",)),
                 ),
             ),
             Category(
@@ -62,8 +62,8 @@ register(
                     Template('site:{principal:raw} inurl:careers OR inurl:carrieres OR inurl:recrutement'),
                     Template('site:{principal:raw} "offre d\'emploi" OR "nous recrutons"'),
                     Template(
-                        'site:linkedin.com/jobs OR site:indeed.fr {entreprise}',
-                        requires=("entreprise",),
+                        'site:linkedin.com/jobs OR site:indeed.fr {company}',
+                        requires=("company",),
                     ),
                 ),
             ),
@@ -72,7 +72,7 @@ register(
                 (
                     Template('-site:{principal:raw} "{principal:raw}" presse OR communiqué'),
                     Template('"{principal:raw}" intitle:interview OR intitle:article'),
-                    Template('{entreprise} "{principal:raw}" actualités', requires=("entreprise",)),
+                    Template('{company} "{principal:raw}" actualités', requires=("company",)),
                 ),
             ),
         ),

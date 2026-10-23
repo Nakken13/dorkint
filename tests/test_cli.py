@@ -10,7 +10,7 @@ runner = CliRunner()
 
 
 def test_seven_modes_declared() -> None:
-    assert MODES == ("nom-prenom", "username", "ville", "site", "mail", "tel", "entreprise")
+    assert MODES == ("fullname", "username", "city", "site", "email", "phone", "company")
 
 
 def test_version() -> None:
@@ -63,14 +63,14 @@ def test_mode_prints_clickable_google_links_by_category(mode: str) -> None:
 
 
 def test_refinement_adds_links() -> None:
-    sans = runner.invoke(app, ["nom-prenom", "Jean Dupont"]).output
-    avec = runner.invoke(app, ["nom-prenom", "Jean Dupont", "--ville", "Lyon"]).output
+    sans = runner.invoke(app, ["fullname", "Jean Dupont"]).output
+    avec = runner.invoke(app, ["fullname", "Jean Dupont", "--city", "Lyon"]).output
     assert avec.count("https://") > sans.count("https://")
     assert "Lyon" in avec
 
 
 def test_unsupported_refinement_is_a_clean_error() -> None:
-    result = runner.invoke(app, ["ville", "Lyon", "--ville", "Paris"])
+    result = runner.invoke(app, ["city", "Lyon", "--city", "Paris"])
     assert result.exit_code == 2
     assert "affinage" in result.output
 
@@ -99,7 +99,7 @@ def test_blank_value_is_rejected() -> None:
 
 
 def test_mode_help_documents_options() -> None:
-    result = runner.invoke(app, ["nom-prenom", "--help"])
+    result = runner.invoke(app, ["fullname", "--help"])
     assert result.exit_code == 0
-    for option in ("--ville", "--entreprise", "--out", "--force"):
+    for option in ("--city", "--company", "--out", "--force"):
         assert option in result.output

@@ -27,25 +27,25 @@ Pour développer : `pip install -e .[dev]`.
 ## Utilisation
 
 ```bash
-dorkint <mode> <valeur> [--ville VILLE] [--entreprise ENTREPRISE] [--out FICHIER] [--force]
+dorkint <mode> <value> [--city CITY] [--company COMPANY] [--out FICHIER] [--force]
 ```
 
 | Mode | Valeur principale | Affinages |
 |------|-------------------|-----------|
-| `nom-prenom` | « Jean Dupont » | `--ville`, `--entreprise` |
-| `username` | pseudo | `--ville`, `--entreprise` |
-| `ville` | nom de ville | `--entreprise` |
-| `site` | domaine (`exemple.fr`) | `--entreprise` |
-| `mail` | adresse mail | `--ville`, `--entreprise` |
-| `tel` | numéro français | `--ville`, `--entreprise` |
-| `entreprise` | raison sociale ou SIREN | `--ville` |
+| `fullname` | « Jean Dupont » | `--city`, `--company` |
+| `username` | pseudo | `--city`, `--company` |
+| `city` | nom de ville | `--company` |
+| `site` | domaine (`exemple.fr`) | `--company` |
+| `email` | adresse mail | `--city`, `--company` |
+| `phone` | numéro français | `--city`, `--company` |
+| `company` | raison sociale ou SIREN | `--city` |
 
 Exemples (valeurs fictives) :
 
 ```bash
-dorkint nom-prenom "Jean Dupont" --ville Lyon
+dorkint fullname "Jean Dupont" --city Lyon
 dorkint site exemple.fr
-dorkint entreprise "Acme" --out liens.txt
+dorkint company "Acme" --out liens.txt
 ```
 
 La sortie est une liste d'URL, une par ligne, sous des en-têtes `## Catégorie`.
@@ -56,7 +56,7 @@ La sortie est une liste d'URL, une par ligne, sous des en-têtes `## Catégorie`
 
 - France uniquement pour l'instant (Infogreffe, societe.com, Pages Jaunes,
   data.gouv.fr, BODACC, Journal Officiel...).
-- Le mode `tel` cherche les 5 écritures usuelles d'un numéro français ; le mode `mail` cherche aussi la partie locale et le domaine séparément.
+- Le mode `phone` cherche les 5 écritures usuelles d'un numéro français ; le mode `email` cherche aussi la partie locale et le domaine séparément.
 - Les résultats de Google peuvent être inexacts ou concerner des homonymes.
 
 ## Ajouter un mode

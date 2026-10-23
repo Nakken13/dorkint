@@ -20,7 +20,7 @@ FORBIDDEN = (
 def test_mode_registered() -> None:
     mode = get_mode("site")
     assert mode.name == "site"
-    assert mode.refinements == ("entreprise",)
+    assert mode.refinements == ("company",)
 
 
 def test_every_category_has_a_dork() -> None:
@@ -56,17 +56,17 @@ def test_directory_listings_and_documents() -> None:
 
 def test_refinement_entreprise_adds_dorks() -> None:
     base = sum(len(v) for v in generer("site", "exemple.fr").values())
-    refined = generer("site", "exemple.fr", {"entreprise": "Acme"})
+    refined = generer("site", "exemple.fr", {"company": "Acme"})
     assert sum(len(v) for v in refined.values()) > base
     assert any('"Acme"' in d.query for dorks in refined.values() for d in dorks)
 
 
 def test_unknown_refinement_rejected() -> None:
     with pytest.raises(DorkintError):
-        generer("site", "exemple.fr", {"ville": "Paris"})
+        generer("site", "exemple.fr", {"city": "Paris"})
 
 
-@pytest.mark.parametrize("affinages", [{}, {"entreprise": "Acme"}])
+@pytest.mark.parametrize("affinages", [{}, {"company": "Acme"}])
 def test_no_credentials_terms(affinages: dict[str, str]) -> None:
     for dorks in generer("site", "exemple.fr", affinages).values():
         for dork in dorks:

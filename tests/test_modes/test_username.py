@@ -15,7 +15,7 @@ EXPECTED_CATEGORIES = {
 
 def test_mode_registered_with_refinements() -> None:
     mode = get_mode("username")
-    assert set(mode.refinements) == {"ville", "entreprise"}
+    assert set(mode.refinements) == {"city", "company"}
     assert EXPECTED_CATEGORIES <= {c.name for c in mode.categories}
 
 
@@ -46,7 +46,7 @@ def test_pdf_and_french_sources() -> None:
 
 def test_refinements_cross() -> None:
     base = generer("username", "x1", {})
-    crossed = generer("username", "x1", {"ville": "Lyon", "entreprise": "Acme"})
+    crossed = generer("username", "x1", {"city": "Lyon", "company": "Acme"})
     count = lambda r: sum(len(v) for v in r.values())
     assert count(crossed) > count(base)
     queries = [d.query for v in crossed.values() for d in v]

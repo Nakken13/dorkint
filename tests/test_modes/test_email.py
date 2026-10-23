@@ -12,20 +12,20 @@ FORBIDDEN = re.compile(
 
 
 def test_mode_enregistre() -> None:
-    mode = get_mode("mail")
-    assert mode.name == "mail"
-    assert set(mode.refinements) == {"ville", "entreprise"}
+    mode = get_mode("email")
+    assert mode.name == "email"
+    assert set(mode.refinements) == {"city", "company"}
 
 
 def test_chaque_categorie_produit_un_dork() -> None:
-    mode = get_mode("mail")
-    result = generer("mail", ADRESSE)
+    mode = get_mode("email")
+    result = generer("email", ADRESSE)
     for category in mode.categories:
         assert result.get(category.name), f"catégorie vide : {category.name}"
 
 
 def test_valeur_principale_entre_guillemets() -> None:
-    for dorks in generer("mail", ADRESSE, {"ville": "Lyon", "entreprise": "Acme"}).values():
+    for dorks in generer("email", ADRESSE, {"city": "Lyon", "company": "Acme"}).values():
         for dork in dorks:
             if dork.category == "Partie locale et domaine" and "site:jean" not in dork.query and '"jean"' in dork.query:
                 continue  # dorks sur la seule partie locale
@@ -33,31 +33,31 @@ def test_valeur_principale_entre_guillemets() -> None:
 
 
 def test_categories_attendues() -> None:
-    names = " | ".join(generer("mail", ADRESSE)).lower()
+    names = " | ".join(generer("email", ADRESSE)).lower()
     for expected in ("web", "pdf", "réseaux", "forum", "annuaire", "presse", "partie locale"):
         assert expected in names
 
 
 def test_pdf_filetype() -> None:
-    queries = [d.query for ds in generer("mail", ADRESSE).values() for d in ds]
+    queries = [d.query for ds in generer("email", ADRESSE).values() for d in ds]
     assert any("filetype:pdf" in q for q in queries)
 
 
 def test_affinages_croises() -> None:
-    base = generer("mail", ADRESSE)
-    full = generer("mail", ADRESSE, {"ville": "Lyon", "entreprise": "Acme"})
+    base = generer("email", ADRESSE)
+    full = generer("email", ADRESSE, {"city": "Lyon", "company": "Acme"})
     count = lambda r: sum(len(v) for v in r.values())
     assert count(full) > count(base)
     queries = [d.query for ds in full.values() for d in ds]
     assert any('"Lyon"' in q for q in queries)
     assert any('"Acme"' in q for q in queries)
     assert any('"Lyon"' in q and '"Acme"' in q for q in queries)
-    ville_only = [d.query for ds in generer("mail", ADRESSE, {"ville": "Lyon"}).values() for d in ds]
+    ville_only = [d.query for ds in generer("email", ADRESSE, {"city": "Lyon"}).values() for d in ds]
     assert not any("Acme" in q for q in ville_only)
 
 
 def test_aucun_terme_credentials() -> None:
-    mode = get_mode("mail")
+    mode = get_mode("email")
     for category in mode.categories:
         assert not FORBIDDEN.search(category.name)
         for template in category.templates:
@@ -65,7 +65,7 @@ def test_aucun_terme_credentials() -> None:
 
 
 def test_pas_de_doublon() -> None:
-    queries = [d.query for ds in generer("mail", ADRESSE, {"ville": "Lyon", "entreprise": "Acme"}).values() for d in ds]
+    queries = [d.query for ds in generer("email", ADRESSE, {"city": "Lyon", "company": "Acme"}).values() for d in ds]
     assert len(queries) == len(set(queries))
 
 
@@ -74,22 +74,22 @@ def test_affinage_inconnu_refuse(affinage: str) -> None:
     from dorkint.builder import DorkintError
 
     with pytest.raises(DorkintError):
-        generer("mail", ADRESSE, {affinage: "x"})
+        generer("email", ADRESSE, {affinage: "x"})
 
 
 def test_partie_locale_et_domaine_recherchees_separement() -> None:
-    requetes = [d.query for d in generer("mail", "jean.dupont@exemple.fr")["Partie locale et domaine"]]
+    requetes = [d.query for d in generer("email", "jean.dupont@exemple.fr")["Partie locale et domaine"]]
     assert '"jean.dupont" site:exemple.fr' in requetes
     assert '"jean.dupont" -site:exemple.fr' in requetes
 
 
 def test_valeur_sans_arobase_n_a_pas_de_variantes_locale_domaine() -> None:
-    requetes = [d.query for d in generer("mail", "jean.dupont")["Partie locale et domaine"]]
+    requetes = [d.query for d in generer("email", "jean.dupont")["Partie locale et domaine"]]
     assert all("site:exemple" not in q for q in requetes)
     assert not any("site:" in q and "jean.dupont" in q and "-site:linkedin" not in q for q in requetes)
 
 
 @pytest.mark.parametrize("saisie", ["jean@localhost", "a@b@c.fr", "jean@", "@exemple.fr", "jean@exemple.fr foo"])
 def test_adresse_invalide_sans_valeurs_derivees(saisie: str) -> None:
-    requetes = [d.query for d in generer("mail", saisie)["Partie locale et domaine"]]
+    requetes = [d.query for d in generer("email", saisie)["Partie locale et domaine"]]
     assert not any("site:exemple" in q or "site:localhost" in q or "site:c.fr" in q for q in requetes)
