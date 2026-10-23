@@ -19,6 +19,27 @@ def test_version() -> None:
     assert dorkint.__version__ in result.output
 
 
+def test_info_lists_every_mode_category_and_pattern() -> None:
+    from dorkint import builder
+
+    result = runner.invoke(app, ["--info"])
+    assert result.exit_code == 0
+    for mode in MODES:
+        assert f"# {mode}" in result.output
+    for mode in MODES:
+        for category in builder.get_mode(mode).categories:
+            assert f"## {category.name}" in result.output
+            for template in category.templates:
+                assert template.pattern in result.output
+    assert "https://" not in result.output
+
+
+def test_info_flags_templates_needing_refinements() -> None:
+    result = runner.invoke(app, ["--info"])
+    assert "{principal} {city}  [--city]" in result.output
+    assert "{local} site:{domaine:raw}  [local, domaine]" in result.output
+
+
 def test_help_lists_every_mode() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0

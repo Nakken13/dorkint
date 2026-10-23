@@ -9,8 +9,8 @@ from typer.core import TyperGroup
 
 from dorkint import __version__
 from dorkint.banner import banner
-from dorkint.builder import DorkintError, generer
-from dorkint.output import formater, sauvegarder
+from dorkint.builder import DorkintError, generer, get_mode
+from dorkint.output import formater, formater_info, sauvegarder
 
 MODES = ("fullname", "username", "city", "site", "email", "phone", "company")
 
@@ -51,10 +51,20 @@ def _show_version(value: bool) -> None:
         raise typer.Exit()
 
 
+def _show_info(value: bool) -> None:
+    if value:
+        typer.echo(formater_info([get_mode(m) for m in MODES]))
+        raise typer.Exit()
+
+
 @app.callback()
 def _root(
     version: Annotated[
         bool, typer.Option("--version", callback=_show_version, is_eager=True, help="Affiche la version.")
+    ] = False,
+    info: Annotated[
+        bool,
+        typer.Option("--info", callback=_show_info, is_eager=True, help="Liste les dorks (patrons) de chaque mode."),
     ] = False,
 ) -> None:
     """Options globales."""
