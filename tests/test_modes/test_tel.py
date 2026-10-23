@@ -79,3 +79,10 @@ def test_variantes_tel_normalise_toutes_les_saisies(saisie):
 def test_variantes_tel_numero_non_francais_renvoie_la_saisie():
     assert variantes_tel("abc") == ["abc"]
     assert variantes_tel("+44 20 7946 0958") == ["+44 20 7946 0958"]
+
+
+def test_toutes_les_ecritures_du_numero_sont_cherchees() -> None:
+    requete = generer("tel", "06 12 34 56 78")["Mentions web"][0].query
+    for ecriture in ("06 12 34 56 78", "06.12.34.56.78", "0612345678", "+33 6 12 34 56 78", "+33612345678"):
+        assert f'"{ecriture}"' in requete
+    assert " OR " in requete

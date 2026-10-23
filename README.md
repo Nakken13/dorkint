@@ -56,8 +56,7 @@ La sortie est une liste d'URL, une par ligne, sous des en-têtes `## Catégorie`
 
 - France uniquement pour l'instant (Infogreffe, societe.com, Pages Jaunes,
   data.gouv.fr, BODACC, Journal Officiel...).
-- Le mode `tel` ne cible que le format saisi, pas les autres écritures du numéro.
-- Le mode `mail` ne cherche pas séparément le nom d'utilisateur et le domaine.
+- Le mode `tel` cherche les 5 écritures usuelles d'un numéro français ; le mode `mail` cherche aussi la partie locale et le domaine séparément.
 - Les résultats de Google peuvent être inexacts ou concerner des homonymes.
 
 ## Ajouter un mode

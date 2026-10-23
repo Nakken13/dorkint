@@ -10,8 +10,7 @@ _FR = re.compile(r"^(?:0|\+?33|0033)(\d{9})$")
 def variantes_tel(numero: str) -> list[str]:
     """Formats équivalents d'un numéro FR ; saisie inchangée si ce n'est pas un numéro FR.
 
-    Non utilisée par `generer` (un Template ne substitue qu'un `{principal}`), exportée pour
-    une future gestion de variantes multiples par le moteur.
+    Branchée sur le mode via `Mode.variantes` : `{principal}` devient `("a" OR "b" ...)`.
     """
     brut = re.sub(r"[\s.\-()]", "", numero)
     match = _FR.match(brut)
@@ -31,6 +30,7 @@ def variantes_tel(numero: str) -> list[str]:
 register(Mode(
     name="tel",
     refinements=("ville", "entreprise"),
+    variantes=variantes_tel,
     categories=(
         Category("Annuaires inversés", (
             Template("site:pagesjaunes.fr {principal}"),

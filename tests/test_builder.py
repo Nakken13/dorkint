@@ -89,3 +89,31 @@ def test_register_rejects_duplicate_name(fake_mode: Mode) -> None:
 def test_modes_discovered_from_package(tmp_path: object) -> None:
     # le chargement automatique ne doit pas échouer sur le package modes (même vide)
     builder.load_modes()
+
+
+def test_variantes_render_principal_as_or_group(monkeypatch: pytest.MonkeyPatch) -> None:
+    mode = Mode(
+        "multi",
+        (),
+        (Category("A", (Template("{principal} annuaire"),)),),
+        variantes=lambda v: [v, v.replace(" ", "")],
+    )
+    monkeypatch.setitem(builder._REGISTRY, "multi", mode)
+    assert generer("multi", "06 12", {})["A"][0].query == '("06 12" OR "0612") annuaire'
+
+
+def test_derive_adds_placeholders_usable_in_templates(monkeypatch: pytest.MonkeyPatch) -> None:
+    mode = Mode(
+        "derive",
+        (),
+        (Category("A", (Template("{principal} {local:raw} @{domaine:raw}", requires=("local", "domaine")),)),),
+        derive=lambda v: dict(zip(("local", "domaine"), v.split("@"), strict=True)),
+        derived=("local", "domaine"),
+    )
+    monkeypatch.setitem(builder._REGISTRY, "derive", mode)
+    assert generer("derive", "jean@exemple.fr", {})["A"][0].query == '"jean@exemple.fr" jean @exemple.fr'
+
+
+def test_derived_placeholder_must_be_declared() -> None:
+    with pytest.raises(DorkintError, match="non déclaré"):
+        Mode("x", (), (Category("A", (Template("{principal} {local}", requires=("local",)),)),))

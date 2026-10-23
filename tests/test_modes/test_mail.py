@@ -27,7 +27,7 @@ def test_chaque_categorie_produit_un_dork() -> None:
 def test_valeur_principale_entre_guillemets() -> None:
     for dorks in generer("mail", ADRESSE, {"ville": "Lyon", "entreprise": "Acme"}).values():
         for dork in dorks:
-            assert f'"{ADRESSE}"' in dork.query
+            assert f'"{ADRESSE}"' in dork.query or '"jean' in dork.query  # partie locale seule
 
 
 def test_categories_attendues() -> None:
@@ -73,3 +73,16 @@ def test_affinage_inconnu_refuse(affinage: str) -> None:
 
     with pytest.raises(DorkintError):
         generer("mail", ADRESSE, {affinage: "x"})
+
+
+def test_partie_locale_et_domaine_recherchees_separement() -> None:
+    requetes = [d.query for d in generer("mail", "jean.dupont@exemple.fr")["Partie locale et domaine"]]
+    assert '"jean.dupont"' in requetes
+    assert '"jean.dupont" site:exemple.fr' in requetes
+    assert '"jean.dupont" -site:exemple.fr' in requetes
+
+
+def test_valeur_sans_arobase_n_a_pas_de_variantes_locale_domaine() -> None:
+    requetes = [d.query for d in generer("mail", "jean.dupont")["Partie locale et domaine"]]
+    assert all("site:exemple" not in q for q in requetes)
+    assert '"jean.dupont"' not in requetes

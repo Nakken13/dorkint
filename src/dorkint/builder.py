@@ -3,7 +3,7 @@
 import importlib
 import pkgutil
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 
 from dorkint.guardrails import termes_interdits
@@ -40,15 +40,21 @@ class Category:
 
 @dataclass(frozen=True)
 class Mode:
+    """`variantes` : écritures alternatives du principal, rendues `("a" OR "b")`.
+    `derive` : valeurs calculées depuis le principal, nommées dans `derived`."""
+
     name: str
     refinements: tuple[str, ...]
     categories: tuple[Category, ...]
+    variantes: Callable[[str], list[str]] | None = None
+    derive: Callable[[str], Mapping[str, str]] | None = None
+    derived: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.categories:
             raise DorkintError(f"Le mode '{self.name}' n'a aucune catégorie.")
         for template in (t for c in self.categories for t in c.templates):
-            unknown = set(template.requires) - set(self.refinements)
+            unknown = set(template.requires) - set(self.refinements) - set(self.derived)
             if unknown:
                 raise DorkintError(f"Mode '{self.name}' : affinage(s) non déclaré(s) {sorted(unknown)}.")
 
@@ -89,10 +95,15 @@ def get_mode(name: str) -> Mode:
     return _REGISTRY[name]
 
 
-def _render(template: Template, values: Mapping[str, str]) -> str:
+def _render(template: Template, values: Mapping[str, str], variantes: Sequence[str] = ()) -> str:
     def substitute(match: re.Match[str]) -> str:
-        value = values[match.group(1)]
-        return value if match.group(2) else f'"{value}"'
+        name, raw = match.groups()
+        value = values[name]
+        if raw:
+            return value
+        if name == "principal" and len(variantes) > 1:
+            return "(" + " OR ".join(f'"{v}"' for v in variantes) + ")"
+        return f'"{value}"'
 
     return _PLACEHOLDER.sub(substitute, template.pattern)
 
@@ -114,6 +125,9 @@ def generer(
         raise DorkintError(f"Mode '{mode.name}' : affinage(s) non supporté(s) {sorted(unsupported)}.")
     values = {"principal": principal}
     values.update({k: c for k, v in (affinages or {}).items() if (c := _clean(v))})
+    if mode.derive:
+        values.update(mode.derive(principal))
+    variantes = [c for v in mode.variantes(principal) if (c := _clean(v))] if mode.variantes else []
 
     result: dict[str, list[Dork]] = {}
     for category in mode.categories:
@@ -121,7 +135,7 @@ def generer(
         for template in category.templates:
             if not all(r in values for r in template.requires):
                 continue
-            query = _render(template, values)
+            query = _render(template, values, variantes)
             if query not in seen:
                 seen.add(query)
                 result.setdefault(category.name, []).append(Dork(category.name, query))

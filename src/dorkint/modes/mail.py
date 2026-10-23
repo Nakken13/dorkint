@@ -2,10 +2,19 @@
 
 from dorkint.builder import Category, Mode, Template, register
 
+
+def _decouper(adresse: str) -> dict[str, str]:
+    """Partie locale et domaine d'une adresse ; vide si ce n'est pas une adresse."""
+    local, arobase, domaine = adresse.rpartition("@")
+    return {"local": local, "domaine": domaine} if arobase and local and domaine else {}
+
+
 register(
     Mode(
         name="mail",
         refinements=("ville", "entreprise"),
+        derive=_decouper,
+        derived=("local", "domaine"),
         categories=(
             Category(
                 "Mentions web",
@@ -70,6 +79,9 @@ register(
             Category(
                 "Partie locale et domaine",
                 (
+                    Template("{local}", requires=("local",)),
+                    Template("{local} site:{domaine:raw}", requires=("local", "domaine")),
+                    Template("{local} -site:{domaine:raw}", requires=("local", "domaine")),
                     Template("inurl:{principal}"),
                     Template("intitle:{principal}"),
                     Template("{principal} -site:linkedin.com -site:facebook.com"),
