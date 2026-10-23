@@ -27,7 +27,7 @@ Pour développer : `pip install -e .[dev]`.
 ## Utilisation
 
 ```bash
-dorkint <mode> <value> [--city CITY] [--company COMPANY] [--out FICHIER] [--force]
+dorkint <mode> <value...> [--city CITY] [--company COMPANY] [--out FICHIER] [--force]
 ```
 
 | Mode | Valeur principale | Affinages |
@@ -43,7 +43,7 @@ dorkint <mode> <value> [--city CITY] [--company COMPANY] [--out FICHIER] [--forc
 Exemples (valeurs fictives) :
 
 ```bash
-dorkint fullname "Jean Dupont" --city Lyon
+dorkint fullname Jean Dupont --city Lyon     # guillemets facultatifs
 dorkint site exemple.fr
 dorkint company "Acme" --out liens.txt
 ```

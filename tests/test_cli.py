@@ -103,3 +103,17 @@ def test_mode_help_documents_options() -> None:
     assert result.exit_code == 0
     for option in ("--city", "--company", "--out", "--force"):
         assert option in result.output
+
+
+def test_multiple_words_without_quotes_are_joined() -> None:
+    sans_guillemets = runner.invoke(app, ["fullname", "john", "doe"])
+    avec_guillemets = runner.invoke(app, ["fullname", "john doe"])
+    assert sans_guillemets.exit_code == 0
+    assert sans_guillemets.output == avec_guillemets.output
+    assert "%22john+doe%22" in sans_guillemets.output
+
+
+def test_options_still_work_after_unquoted_words() -> None:
+    result = runner.invoke(app, ["fullname", "john", "doe", "--city", "Lyon"])
+    assert result.exit_code == 0
+    assert "%22john+doe%22+%22Lyon%22" in result.output

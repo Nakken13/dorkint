@@ -67,16 +67,18 @@ def _fail(message: str) -> NoReturn:
 
 def _register(mode: str) -> None:
     def command(
-        value: Annotated[str | None, typer.Argument(help="Valeur principale à rechercher.")] = None,
+        words: Annotated[
+            list[str] | None, typer.Argument(metavar="VALUE...", help="Valeur à rechercher (guillemets facultatifs).")
+        ] = None,
         city: Annotated[str | None, typer.Option(help="Ville connue (affinage).")] = None,
         company: Annotated[str | None, typer.Option(help="Entreprise connue (affinage).")] = None,
         out: Annotated[Path | None, typer.Option(help="Fichier où sauvegarder les liens.")] = None,
         force: Annotated[bool, typer.Option("--force", help="Écrase le fichier --out s'il existe.")] = False,
     ) -> None:
-        if value is None:
+        if not words:
             _fail(f"valeur principale manquante pour le mode '{mode}'.")
         try:
-            groupes = generer(mode, value, {"city": city, "company": company})
+            groupes = generer(mode, " ".join(words), {"city": city, "company": company})
             texte = formater(groupes)
             if out:
                 sauvegarder(texte + "\n", out, ecraser=force)
