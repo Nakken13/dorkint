@@ -51,7 +51,7 @@ def test_refinements_add_cross_dorks() -> None:
     base = generer("nom-prenom", PRINCIPAL)
     ville = generer("nom-prenom", PRINCIPAL, {"ville": "Lyon"})
     both = generer("nom-prenom", PRINCIPAL, {"ville": "Lyon", "entreprise": "Acme"})
-    count = lambda r: sum(len(v) for v in r.values())  # noqa: E731
+    count = lambda r: sum(len(v) for v in r.values())
     assert count(base) < count(ville) < count(both)
     assert any('"Lyon"' in d.query for ds in ville.values() for d in ds)
     assert any('"Lyon"' in d.query and '"Acme"' in d.query for ds in both.values() for d in ds)

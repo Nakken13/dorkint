@@ -44,7 +44,7 @@ def test_pdf_filetype() -> None:
 def test_affinages_croises() -> None:
     base = generer("mail", ADRESSE)
     full = generer("mail", ADRESSE, {"ville": "Lyon", "entreprise": "Acme"})
-    count = lambda r: sum(len(v) for v in r.values())  # noqa: E731
+    count = lambda r: sum(len(v) for v in r.values())
     assert count(full) > count(base)
     queries = [d.query for ds in full.values() for d in ds]
     assert any('"Lyon"' in q for q in queries)

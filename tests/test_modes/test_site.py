@@ -1,6 +1,6 @@
 import pytest
 
-from dorkint.builder import DorkintError, get_mode, generer
+from dorkint.builder import DorkintError, generer, get_mode
 
 FORBIDDEN = (
     "password",
