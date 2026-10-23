@@ -31,7 +31,7 @@ class _ModeGroup(TyperGroup):
 app = typer.Typer(
     cls=_ModeGroup,
     name="dorkint",
-    help="Génère des Google dorks pour la reconnaissance OSINT (aucune recherche exécutée).",
+    help="Génère des Google dorks pour la reconnaissance OSINT (aucune recherche exécutée). Usage réservé à des cibles autorisées : voir DISCLAIMER.md.",
     no_args_is_help=True,
     add_completion=False,
 )

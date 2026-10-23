@@ -6,6 +6,8 @@ build-backend = "hatchling.build"
 name = "dorkint"
 version = "0.1.0"
 description = "Générateur de Google dorks pour la reconnaissance OSINT (aucune recherche exécutée)."
+readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = ["typer>=0.12"]
 
