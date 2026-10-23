@@ -4,20 +4,19 @@ from dorkint.banner import banner
 from dorkint.cli import app
 
 runner = CliRunner()
-TITRE = r"|  _ \  / _ \ |  _ \ | |/ /|_ _|| \ | ||_   _|"
+TITRE = r" |___/\___/_| |_\_\_|_||_\__|"
 
 
-def test_banner_is_pure_ascii_and_fits_a_terminal() -> None:
+def test_banner_fits_a_terminal() -> None:
     texte = banner()
-    assert texte.isascii()
     assert max(len(ligne) for ligne in texte.splitlines()) <= 80
 
 
 def test_banner_has_an_eye_above_the_big_title() -> None:
     lignes = banner().splitlines()
-    assert len(lignes) == 12
-    assert "( (  ) )" in lignes[3]
-    assert lignes[-4] == TITRE
+    assert len(lignes) == 13
+    assert "⣿" in lignes[3]
+    assert lignes[-1].strip() == TITRE.strip()
 
 
 def test_help_shows_banner() -> None:

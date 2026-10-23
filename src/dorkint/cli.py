@@ -1,5 +1,6 @@
 """Point d'entrée CLI : un sous-commande par mode de recherche."""
 
+import sys
 from pathlib import Path
 from typing import Annotated, NoReturn
 
@@ -19,6 +20,8 @@ class _ModeGroup(TyperGroup):
     """Groupe racine : bannière dans l'aide, erreurs de mode inconnu en français."""
 
     def format_help(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(errors="replace")  # braille hors encodage console : pas de crash
         typer.echo(typer.style(banner(), fg=typer.colors.CYAN))
         super().format_help(ctx, formatter)
 
