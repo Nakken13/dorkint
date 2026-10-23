@@ -6,6 +6,8 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from dorkint.guardrails import termes_interdits
+
 _PLACEHOLDER = re.compile(r"\{(\w+)(?::(raw))?\}")
 
 
@@ -63,6 +65,12 @@ _REGISTRY: dict[str, Mode] = {}
 def register(mode: Mode) -> Mode:
     if mode.name in _REGISTRY:
         raise DorkintError(f"Le mode '{mode.name}' est déjà enregistré.")
+    for category in mode.categories:
+        for texte in (category.name, *(t.pattern for t in category.templates)):
+            if interdits := termes_interdits(texte):
+                raise DorkintError(
+                    f"Mode '{mode.name}' : terme(s) interdit(s) {interdits} dans '{texte}' (garde-fou credentials)."
+                )
     _REGISTRY[mode.name] = mode
     return mode
 
