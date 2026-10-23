@@ -52,6 +52,10 @@ La sortie est une liste d'URL, une par ligne, sous des en-têtes `## Catégorie`
 `--out` sauvegarde dans un fichier et refuse d'écraser un fichier existant sans
 `--force`. Les erreurs d'arguments retournent le code 2.
 
+`dorkint --info` liste les patrons de dorks de chaque mode, par catégorie, sans rien
+générer. Un suffixe entre crochets indique ce qu'un patron exige : un affinage
+(`[--city]`) ou une valeur dérivée de la valeur principale (`[local, domaine]`).
+
 ## Périmètre et limites
 
 - France uniquement pour l'instant (Infogreffe, societe.com, Pages Jaunes,
