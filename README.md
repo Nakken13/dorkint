@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="media/logo.png" alt="dorkint logo" width="180">
+<img src="media/logo.png" alt="dorkint logo" width="420">
 
 # dorkint
 
