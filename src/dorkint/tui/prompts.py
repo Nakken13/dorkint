@@ -1,6 +1,9 @@
 """Only menu module that touches `input()`; I/O is injectable for tests."""
 
+import sys
 from collections.abc import Callable, Sequence
+
+from dorkint.visual import render_menu
 
 InputFn = Callable[[str], str]
 PrintFn = Callable[[str], None]
@@ -10,15 +13,13 @@ def choose(
     title: str,
     options: Sequence[str],
     *,
+    hints: Sequence[str] = (),
     back: str = "Back",
     input_fn: InputFn = input,
     print_fn: PrintFn = print,
 ) -> int | None:
     """Numbered menu; returns the 0-based index of the option, or None for `q` (back)."""
-    print_fn(f"\n{title}")
-    for number, option in enumerate(options, start=1):
-        print_fn(f"  {number}) {option}")
-    print_fn(f"  q) {back}")
+    print_fn("\n" + render_menu(title, options, hints=hints, back=back, color=sys.stdout.isatty()))
     while True:
         entry = input_fn("> ").strip()
         if entry.lower() == "q":

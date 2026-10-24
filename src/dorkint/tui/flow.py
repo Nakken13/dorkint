@@ -23,6 +23,16 @@ class _Results(NamedTuple):
     title: str
 
 
+_MODE_HINTS = {
+    "fullname": "first + last name",
+    "username": "handle across platforms",
+    "city": "people tied to a town",
+    "site": "everything on a domain",
+    "email": "address, leaks, commits",
+    "phone": "number lookups",
+    "company": "employees and traces",
+}
+
 _REFINEMENT_LABELS = {"city": "Known city", "company": "Known company"}
 
 
@@ -88,7 +98,11 @@ def show_banner(print_fn: PrintFn) -> None:
 
 
 def run(input_fn: InputFn = input, print_fn: PrintFn = print, open_fn: OpenFn = webbrowser.open) -> None:
-    while (index := choose("Search mode", list(MODES), back="Quit", input_fn=input_fn, print_fn=print_fn)) is not None:
+    modes = list(MODES)
+    hints = [_MODE_HINTS.get(m, "") for m in modes]
+    while (
+        index := choose("Search mode", modes, hints=hints, back="Quit", input_fn=input_fn, print_fn=print_fn)
+    ) is not None:
         mode = list(MODES)[index]
         while (results := _search(mode, input_fn, print_fn)) is not None:
             if not _after_results(results, mode, input_fn, print_fn, open_fn):

@@ -9,7 +9,9 @@ from io import StringIO
 from rich import box
 from rich.console import Console, Group
 from rich.panel import Panel
+from rich.rule import Rule
 from rich.style import Style
+from rich.table import Table
 from rich.text import Text
 
 from dorkint.output import to_google_url
@@ -43,6 +45,44 @@ def render_cards(groups: Mapping[str, Sequence[str]], *, color: bool = False) ->
     for category, dorks in groups.items():
         body = Group(*(Text(("▸ " if unicode_ok else "- ") + dork_label(d), style=Style(link=to_google_url(d))) for d in dorks))
         console.print(Panel(body, title=f"{category} ({len(dorks)})", title_align="left", box=box.ROUNDED if unicode_ok else box.ASCII))
+    return buffer.getvalue().rstrip()
+
+
+def render_menu(
+    title: str,
+    options: Sequence[str],
+    *,
+    hints: Sequence[str] = (),
+    back: str = "Back",
+    color: bool = False,
+) -> str:
+    """Numbered menu in a panel: key badge, option name, dimmed hint; the back key sits below a rule."""
+    width = min(shutil.get_terminal_size((80, 24)).columns, 64)
+    buffer = StringIO()
+    console = Console(file=buffer, width=width, force_terminal=color, color_system="standard" if color else None)
+    unicode_ok = _unicode_printable()
+    rows = Table.grid(padding=(0, 2))
+    rows.add_column(justify="right")
+    rows.add_column(no_wrap=True)
+    rows.add_column(overflow="ellipsis", no_wrap=True)
+    for number, option in enumerate(options, start=1):
+        hint = hints[number - 1] if number <= len(hints) else ""
+        rows.add_row(Text(f"[{number}]", style="bold cyan"), Text(option, style="bold"), Text(hint, style="dim"))
+    rule = Rule(style="dim", characters="─" if unicode_ok else "-")
+    back_row = Table.grid(padding=(0, 2))
+    back_row.add_column(justify="right")
+    back_row.add_column()
+    back_row.add_row(Text("[q]", style="bold red"), Text(back, style="dim"))
+    console.print(
+        Panel(
+            Group(rows, Text(""), rule, back_row),
+            title=Text(title, style="bold"),
+            title_align="left",
+            box=box.ROUNDED if unicode_ok else box.ASCII,
+            border_style="cyan",
+            padding=(1, 2),
+        )
+    )
     return buffer.getvalue().rstrip()
 
 

@@ -37,7 +37,8 @@ def test_choose_lists_numbered_options_and_back_label() -> None:
     out: list[str] = []
     choose("Mode", ["alpha", "beta"], input_fn=input_fn, print_fn=out.append, back="Quit")
     text = "\n".join(out)
-    assert "1) alpha" in text and "2) beta" in text and "q) Quit" in text
+    assert "[1]" in text and "alpha" in text and "[2]" in text and "beta" in text
+    assert "[q]" in text and "Quit" in text
 
 
 def test_ask_enter_gives_empty_string() -> None:
