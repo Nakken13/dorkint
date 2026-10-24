@@ -102,3 +102,13 @@ def test_visual_report_opens_html_in_browser() -> None:
 def test_results_are_grouped_in_category_cards() -> None:
     text, _ = _run(_n("username"), "kalira", "", "", "", "q", "q")
     assert re.search(r"\(\d+\)", text)  # "<category> (<count>)" card titles
+
+
+def test_dork_counts_match_patterns():
+    from dorkint.modes import MODES, dork_counts
+
+    counts = dork_counts()
+    assert set(counts) == set(MODES)
+    assert all(
+        n == sum(len(p) for p in MODES[name].CATEGORIES.values()) and n > 0 for name, n in counts.items()
+    )

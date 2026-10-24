@@ -9,7 +9,7 @@ from typing import NamedTuple
 
 from dorkint.banner import banner
 from dorkint.builder import DorkintError, generate, refinements_of
-from dorkint.modes import MODES
+from dorkint.modes import MODES, dork_counts
 from dorkint.output import format_dorks, save
 from dorkint.tui.prompts import InputFn, PrintFn, ask, choose
 from dorkint.visual import render_cards, render_html, render_info
@@ -29,6 +29,12 @@ _ABOUT = (
     "It never scrapes or runs a search: you open the links yourself.",
     "Only use it on targets you are authorized to look into.",
 )
+
+def _stats() -> tuple[str, ...]:
+    counts = dork_counts()
+    per_mode = ", ".join(f"{name} {n}" for name, n in counts.items())
+    return ("", "Stats", f"{sum(counts.values())} dorks across {len(counts)} modes", per_mode)
+
 
 _REFINEMENT_LABELS = {"city": "Known city", "company": "Known company"}
 
@@ -97,7 +103,7 @@ def show_banner(print_fn: PrintFn) -> None:
 def run(input_fn: InputFn = input, print_fn: PrintFn = print, open_fn: OpenFn = webbrowser.open) -> None:
     modes = list(MODES)
     def show_about() -> None:
-        print_fn("\n" + render_info("About dorkint", _ABOUT, color=sys.stdout.isatty()))
+        print_fn("\n" + render_info("About dorkint", (*_ABOUT, *_stats()), color=sys.stdout.isatty()))
 
     while (
         index := choose(
