@@ -12,6 +12,7 @@ from dorkint import __version__
 from dorkint.banner import banner
 from dorkint.builder import DorkintError, generate, get_mode
 from dorkint.output import format_dorks, format_info, save
+from dorkint.visual import render_html
 
 MODES = ("fullname", "username", "city", "site", "email", "phone", "company")
 
@@ -92,7 +93,8 @@ def _register(mode: str) -> None:
         company: Annotated[str | None, typer.Option(help="Known company (refinement).")] = None,
         keyword: Annotated[str | None, typer.Option(help="Keyword added to every dork (e.g. minecraft).")] = None,
         out: Annotated[Path | None, typer.Option(help="File where the links are saved.")] = None,
-        force: Annotated[bool, typer.Option("--force", help="Overwrite the --out file if it exists.")] = False,
+        html: Annotated[Path | None, typer.Option(help="File where a visual HTML report (cards) is saved.")] = None,
+        force: Annotated[bool, typer.Option("--force", help="Overwrite the --out/--html file if it exists.")] = False,
     ) -> None:
         if not words:
             _fail(f"missing primary value for mode '{mode}'.")
@@ -101,11 +103,15 @@ def _register(mode: str) -> None:
             text = format_dorks(groups)
             if out:
                 save(text + "\n", out, overwrite=force)
+            if html:
+                save(render_html(groups, title=f"Dorkint: {mode} {' '.join(words)}"), html, overwrite=force)
         except DorkintError as error:
             _fail(str(error))
         typer.echo(text)
         if out:
             typer.echo(f"\nLinks saved to '{out}'.", err=True)
+        if html:
+            typer.echo(f"\nVisual report saved to '{html}'.", err=True)
 
     command.__doc__ = f"Mode '{mode}'."
     app.command(name=mode)(command)

@@ -1,11 +1,14 @@
+import re
 from collections.abc import Iterator
 from pathlib import Path
+from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 from dorkint.cli import MODES
 from dorkint.tui.flow import run
 
 
-def _run(*answers: str) -> tuple[str, int]:
+def _run(*answers: str, open_fn=None) -> tuple[str, int]:
     """Plays the input script; returns (output, number of inputs consumed)."""
     it: Iterator[str] = iter(answers)
     out: list[str] = []
@@ -17,7 +20,7 @@ def _run(*answers: str) -> tuple[str, int]:
         consumed += 1
         return next(it)
 
-    run(input_fn=input_fn, print_fn=out.append)
+    run(input_fn=input_fn, print_fn=out.append, open_fn=open_fn or (lambda url: None))
     return "\n".join(out), consumed
 
 
@@ -34,14 +37,14 @@ def test_quit_from_main_menu() -> None:
 
 def test_username_with_keyword_prints_dorks_with_keyword() -> None:
     text, _ = _run(_n("username"), "kalira", "", "", "minecraft", "q", "q")
-    assert "https://www.google.com/search?q=" in text
-    assert "kalira" in text and "%22minecraft%22" in text
+    assert "kalira" in text and '"minecraft"' in text
+    assert "google.com" not in text  # links are hidden behind labels
 
 
 def test_enter_skips_every_optional_field() -> None:
     text, _ = _run(_n("username"), "kalira", "", "", "", "q", "q")
-    assert "https://www.google.com/search?q=" in text
-    assert "%22minecraft%22" not in text
+    assert "kalira" in text
+    assert '"minecraft"' not in text
 
 
 def test_refinements_come_from_the_mode() -> None:
@@ -86,4 +89,16 @@ def test_fullname_asks_first_name_then_last_name() -> None:
     text, consumed = _run(_n("fullname"), "Jean", "Dupont", "", "", "", "q", "q")
     assert "First name" in text and "Last name" in text
     assert consumed == 8
-    assert "Jean+Dupont" in text or "Jean%20Dupont" in text
+    assert "Jean Dupont" in text
+
+
+def test_visual_report_opens_html_in_browser() -> None:
+    opened: list[str] = []
+    _run(_n("username"), "kalira", "", "", "", "3", "q", "q", open_fn=opened.append)
+    assert len(opened) == 1 and opened[0].endswith(".html")
+    assert Path(url2pathname(urlparse(opened[0]).path)).read_text(encoding="utf-8").startswith("<!doctype html>")
+
+
+def test_results_are_grouped_in_category_cards() -> None:
+    text, _ = _run(_n("username"), "kalira", "", "", "", "q", "q")
+    assert re.search(r"\(\d+\)", text)  # "<category> (<count>)" card titles

@@ -9,7 +9,7 @@ description = "Google dork generator for OSINT reconnaissance (no search is run)
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
-dependencies = ["typer>=0.12"]
+dependencies = ["typer>=0.12", "rich>=13"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff", "mypy"]

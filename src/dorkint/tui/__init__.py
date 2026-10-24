@@ -3,8 +3,6 @@
 import os
 import sys
 
-from dorkint.banner import banner
-
 
 def main() -> None:
     if not sys.stdin.isatty():
@@ -15,7 +13,7 @@ def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")  # braille outside the console encoding: no crash
     os.system("")  # enables ANSI escapes (screen clear) on the Windows console
-    print(banner())
+    flow.show_banner(print)
     try:
         flow.run()
     except (KeyboardInterrupt, EOFError):

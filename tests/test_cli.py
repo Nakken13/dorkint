@@ -144,3 +144,19 @@ def test_keyword_option_is_appended_to_every_dork() -> None:
 def test_keyword_forbidden_term_exits_2() -> None:
     result = runner.invoke(app, ["username", "kalira", "--keyword", "password"])
     assert result.exit_code == 2
+
+
+def test_html_option_writes_visual_report(tmp_path: Path) -> None:
+    target = tmp_path / "rapport.html"
+    result = runner.invoke(app, ["username", "kalira", "--html", str(target)])
+    assert result.exit_code == 0
+    html = target.read_text(encoding="utf-8")
+    assert html.startswith("<!doctype html>") and "kalira" in html and "<details" in html
+
+
+def test_html_option_refuses_overwrite_without_force(tmp_path: Path) -> None:
+    target = tmp_path / "rapport.html"
+    target.write_text("ancien", encoding="utf-8")
+    result = runner.invoke(app, ["username", "kalira", "--html", str(target)])
+    assert result.exit_code == 2
+    assert target.read_text(encoding="utf-8") == "ancien"

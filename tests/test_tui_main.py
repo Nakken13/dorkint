@@ -53,3 +53,10 @@ def test_menu_subcommand_is_gone() -> None:
 def test_dorkint_tool_script_declared() -> None:
     data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
     assert data["project"]["scripts"]["dorkint-tool"] == "dorkint.tui:main"
+
+
+def test_main_clears_screen_before_banner(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True, raising=False)
+    monkeypatch.setattr("dorkint.tui.flow.run", lambda: None)
+    tui.main()
+    assert capsys.readouterr().out.startswith("\x1b[2J\x1b[3J\x1b[H")
