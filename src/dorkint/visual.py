@@ -122,32 +122,96 @@ def menu_prompt(*, color: bool = False) -> str:
 
 
 _CSS = """
-:root{--bg:#f6f7fb;--card:#fff;--fg:#1c2230;--muted:#667;--accent:#3b6ef5;--line:#e3e6ef}
-@media(prefers-color-scheme:dark){:root{--bg:#12151d;--card:#1b2030;--fg:#e8ebf5;--muted:#9aa3b8;--accent:#7aa2ff;--line:#2b3247}}
+:root{color-scheme:light dark;--bg:#f5f7f7;--card:#fff;--hover:#f0f4f4;--fg:#14191a;--muted:#51605f;--line:#d5dedd;--accent:#0b6b66;--on-accent:#fff;--focus:#c25a00}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1112;--card:#161b1d;--hover:#1c2326;--fg:#e6ecec;--muted:#9aabab;--line:#2a3436;--accent:#4fd1c5;--on-accent:#06201e;--focus:#ff9f43}}
 *{box-sizing:border-box}
-body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif}
-main{max-width:1100px;margin:0 auto}
-h1{margin:0 0 4px}
-.sub{color:var(--muted);margin:0 0 16px}
-button{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin-right:8px;cursor:pointer}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:16px;align-items:start}
-details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
-summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+body{margin:0;padding:24px 16px;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1200px;margin:0 auto}
+h1{margin:0;font:700 28px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+h1 span{color:var(--focus)}
+.sub{color:var(--muted);font-size:14px;margin:4px 0 0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding:12px 0;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;background:var(--bg)}
+#q{display:none;flex:1 1 100%;min-height:44px;padding:0 12px;font-size:16px;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px}
+.js #q{display:block}
+.bar button{flex:1;min-height:44px;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0 12px;font:inherit;font-size:14px;cursor:pointer}
+.bar button:hover,#q:hover{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px;margin-top:16px;align-items:start}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+summary{cursor:pointer;font-size:15px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px}
 summary::-webkit-details-marker{display:none}
-.count{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:0 10px;font-size:.85em}
-.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.pills a{color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:.9em;text-decoration:none;word-break:break-word}
-.pills a:hover,.pills a:focus-visible{background:var(--accent);color:#fff}
+summary:hover{background:var(--hover)}
+summary::after{content:"";width:8px;height:8px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(-45deg);margin-left:4px}
+details[open]>summary::after{transform:rotate(45deg)}
+.count{margin-left:auto;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:0 10px;font-size:12px;font-weight:400;font-variant-numeric:tabular-nums}
+.pills{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 16px}
+.pills a,.pills a:visited{display:inline-flex;align-items:center;min-height:32px;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font:13px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;text-decoration:none;word-break:break-word}
+.pills a::after{content:"\\2197";margin-left:6px;opacity:.6}
+.pills a:hover{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.pills a:active{transform:translateY(1px)}
+.empty{text-align:center;color:var(--muted);padding:48px 16px}
+.empty button{background:none;border:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
+[hidden]{display:none!important}
+@media(min-width:640px){body{padding:32px 24px}.bar button{flex:none}#q{flex:1 1 240px}}
+@media(pointer:coarse){.pills a{min-height:44px}}
+@media(prefers-reduced-motion:no-preference){summary,.pills a,.bar button{transition:background-color .12s ease-out,color .12s ease-out,border-color .12s ease-out}summary::after{transition:transform .12s ease-out}}
+@media print{.bar{display:none}}
 """
 
-_JS = """
-const toggle = open => document.querySelectorAll('details').forEach(d => d.open = open);
-document.getElementById('open').onclick = () => toggle(true);
-document.getElementById('close').onclick = () => toggle(false);
+_JS = r"""
+document.documentElement.classList.add('js');
+const $ = id => document.getElementById(id);
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const items = [...document.querySelectorAll('details')].map(card => ({
+  card, name: norm(card.dataset.name), badge: card.querySelector('.count'),
+  pills: [...card.querySelectorAll('.pills a')].map(a => ({a, text: norm(a.textContent)})),
+}));
+const total = items.reduce((n, i) => n + i.pills.length, 0);
+const stat = $('stat'), q = $('q'), empty = $('empty'), base = stat.textContent;
+let saved = null, timer = 0;
+const toggle = open => items.forEach(i => { if (!i.card.hidden) i.card.open = open; });
+$('open').onclick = () => toggle(true);
+$('close').onclick = () => toggle(false);
+function apply() {
+  const term = norm(q.value.trim());
+  if (!term) {
+    if (saved) items.forEach((i, k) => { i.card.open = saved[k]; });
+    saved = null;
+    items.forEach(i => { i.card.hidden = false; i.badge.textContent = i.pills.length; i.pills.forEach(p => { p.a.hidden = false; }); });
+    stat.textContent = base; empty.hidden = !!total; $('msg').textContent = 'Nothing to show.'; $('clear').hidden = true;
+    return;
+  }
+  if (!saved) saved = items.map(i => i.card.open);
+  let links = 0, cats = 0;
+  items.forEach(i => {
+    const all = i.name.includes(term);
+    let n = 0;
+    i.pills.forEach(p => { p.a.hidden = !(all || p.text.includes(term)); if (!p.a.hidden) n++; });
+    i.card.hidden = n === 0;
+    i.badge.textContent = n + '/' + i.pills.length;
+    if (n) { i.card.open = true; links += n; cats++; }
+  });
+  stat.textContent = links + ' of ' + total + ' links in ' + cats + ' of ' + items.length + ' categories';
+  empty.hidden = links > 0;
+  $('msg').textContent = 'No link matches "' + q.value.trim() + '".';
+  $('clear').hidden = false;
+}
+q.oninput = () => { clearTimeout(timer); timer = setTimeout(apply, 80); };
+const reset = () => { q.value = ''; apply(); };
+$('clear').onclick = () => { reset(); q.focus(); };
+document.addEventListener('keydown', e => {
+  const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+  if (e.key === '/' && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); q.focus(); }
+  else if (e.key === 'Escape' && document.activeElement === q) { reset(); q.blur(); }
+});
+window.addEventListener('beforeprint', () => items.forEach(i => { i.card.open = true; }));
 """
+
+_OPEN_LIMIT = 12  # more categories than this start collapsed (the filter opens them on demand)
 
 
 def render_html(groups: Mapping[str, Sequence[str]], *, title: str = "Dorkint") -> str:
+    open_attr = " open" if len(groups) <= _OPEN_LIMIT else ""
     cards = []
     for category, dorks in groups.items():
         pills = "".join(
@@ -156,7 +220,7 @@ def render_html(groups: Mapping[str, Sequence[str]], *, title: str = "Dorkint") 
             for d in dorks
         )
         cards.append(
-            f'<details><summary>{escape(category)}'
+            f'<details{open_attr} data-name="{escape(category)}"><summary>{escape(category)}'
             f'<span class="count">{len(dorks)}</span></summary><div class="pills">{pills}</div></details>'
         )
     total = sum(len(d) for d in groups.values())
@@ -164,7 +228,13 @@ def render_html(groups: Mapping[str, Sequence[str]], *, title: str = "Dorkint") 
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         f"<title>{escape(title)}</title><style>{_CSS}</style></head><body><main>"
-        f'<h1>{escape(title)}</h1><p class="sub">{total} links in {len(groups)} categories. Click a card to open it.</p>'
-        '<button id="open" type="button">Expand all</button><button id="close" type="button">Collapse all</button>'
-        f'<div class="grid">{"".join(cards)}</div></main><script>{_JS}</script></body></html>'
+        f'<h1><span aria-hidden="true">&#10095;</span> {escape(title)}</h1>'
+        f'<p class="sub" id="stat" aria-live="polite">{total} links in {len(groups)} categories</p>'
+        '<div class="bar"><input type="search" id="q" aria-label="Filter links" '
+        'placeholder="Filter links… ( / )" autocomplete="off">'
+        '<button id="open" type="button">Expand all</button><button id="close" type="button">Collapse all</button></div>'
+        f'<div class="grid">{"".join(cards)}</div>'
+        f'<div class="empty" id="empty" role="status"{"" if not groups else " hidden"}>'
+        '<p id="msg">Nothing to show.</p><button id="clear" type="button" hidden>Clear filter</button></div>'
+        f"</main><script>{_JS}</script></body></html>"
     )
