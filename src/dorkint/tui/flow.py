@@ -91,7 +91,7 @@ _CLEAR_SCREEN = "\x1b[2J\x1b[3J\x1b[H"
 
 
 def show_banner(print_fn: PrintFn) -> None:
-    print_fn(_CLEAR_SCREEN + banner().rstrip("\n"))  # the menu adds its own leading blank line
+    print_fn(_CLEAR_SCREEN + "\n" + banner().rstrip("\n"))  # the menu adds its own leading blank line
 
 
 def run(input_fn: InputFn = input, print_fn: PrintFn = print, open_fn: OpenFn = webbrowser.open) -> None:

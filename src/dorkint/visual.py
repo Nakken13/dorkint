@@ -115,10 +115,10 @@ def render_info(title: str, lines: Sequence[str], *, color: bool = False) -> str
 
 
 def menu_prompt(*, color: bool = False) -> str:
-    """Input prompt for the menus: `dorkint ❯ ` (orange when `color`), ASCII `dorkint > ` if needed."""
+    """Input prompt for the menus: `dorkint ❯ ` (bold white when `color`), ASCII `dorkint > ` if needed."""
     arrow = "❯" if _unicode_printable() else ">"
     text = f"dorkint {arrow}"
-    return f"\x1b[1;38;5;208m{text}\x1b[0m " if color else f"{text} "
+    return f"\x1b[1;97m{text}\x1b[0m " if color else f"{text} "
 
 
 _CSS = """
