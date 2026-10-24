@@ -31,5 +31,7 @@ def banner() -> str:
     terminal = shutil.get_terminal_size((80, 24)).columns
     lines = [line.ljust(eye_width).center(terminal).rstrip() for line in _EYE]
     lines += [line.ljust(title_width).center(terminal).rstrip() for line in _TITLE]
-    lines.append(f"v{__version__} - Made by Nakken".center(terminal).rstrip())
+    lines.append("")
+    lines.append(f"v{__version__}".center(terminal).rstrip())
+    lines.append("Made by Nakken".center(terminal).rstrip())
     return "\n".join(lines) + "\n"

@@ -60,3 +60,13 @@ def test_main_clears_screen_before_banner(monkeypatch: pytest.MonkeyPatch, capsy
     monkeypatch.setattr("dorkint.tui.flow.run", lambda: None)
     tui.main()
     assert capsys.readouterr().out.startswith("\x1b[2J\x1b[3J\x1b[H")
+
+
+def test_main_clears_screen_on_ctrl_c(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+    def interrupt() -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True, raising=False)
+    monkeypatch.setattr("dorkint.tui.flow.run", interrupt)
+    tui.main()
+    assert capsys.readouterr().out.endswith("\x1b[2J\x1b[3J\x1b[H")

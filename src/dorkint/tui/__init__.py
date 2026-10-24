@@ -17,4 +17,4 @@ def main() -> None:
     try:
         flow.run()
     except (KeyboardInterrupt, EOFError):
-        print("\nGoodbye.")
+        print(flow._CLEAR_SCREEN, end="")

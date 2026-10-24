@@ -15,15 +15,18 @@ def test_banner_fits_a_terminal() -> None:
 
 def test_banner_has_an_eye_above_the_big_title() -> None:
     lines = banner().splitlines()
-    assert len(lines) == 14
+    assert len(lines) == 16
     assert "⣿" in lines[3]
-    assert lines[-2].strip() == TITRE.strip()
+    assert lines[-4].strip() == TITRE.strip()
 
 
-def test_banner_shows_version_and_author_centered() -> None:
-    last = banner().splitlines()[-1]
-    assert last.strip() == f"v{__version__} - Made by Nakken"
-    assert last.startswith(" ")
+def test_banner_shows_version_then_author_centered() -> None:
+    blank, version, author = banner().splitlines()[-3:]
+    assert blank == ""
+    assert version.strip() == f"v{__version__}"
+    assert author.strip() == "Made by Nakken"
+    assert version.startswith(" ")
+    assert author.startswith(" ")
 
 
 def test_help_shows_banner() -> None:
