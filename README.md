@@ -44,9 +44,8 @@ Run `dorkint` alone (or `dorkint-tool`):
 
 ```text
         ╭─ Search mode ────────────────────────────────────────────────╮
-        │  [1]  fullname       [2]  username      [3]  city            │
-        │  [4]  site           [5]  email         [6]  phone           │
-        │                      [7]  company                            │
+        │  [1]  fullname       [2]  username      [3]  site            │
+        │  [4]  email          [5]  phone         [6]  company         │
         │  ──────────────────────────────────────────────────────────  │
         │                  [0]  Info        [q]  Quit                  │
         ╰──────────────────────────────────────────────────────────────╯
@@ -54,7 +53,7 @@ Run `dorkint` alone (or `dorkint-tool`):
 
 | Key | Action |
 |-----|--------|
-| `1`-`7` | Pick a search mode, then enter the value, the refinements and a keyword (ENTER skips a field) |
+| `1`-`6` | Pick a search mode, then enter the value, the refinements and a keyword (ENTER skips a field) |
 | `0` | Show what dorkint does |
 | `q` | Go back / quit |
 
@@ -71,7 +70,6 @@ dorkint <mode> <value...> [--city CITY] [--company COMPANY] [--keyword WORD] [--
 |------|---------------|-------------|
 | `fullname` | "John Smith" | `--city`, `--company` |
 | `username` | username | `--city`, `--company` |
-| `city` | city name | `--company` |
 | `site` | domain (`example.fr`) | `--company` |
 | `email` | email address | `--city`, `--company` |
 | `phone` | French number | `--city`, `--company` |

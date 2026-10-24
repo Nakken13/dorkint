@@ -48,8 +48,8 @@ def test_enter_skips_every_optional_field() -> None:
 
 
 def test_refinements_come_from_the_mode() -> None:
-    # city: a single refinement (company) -> menu, primary, company, keyword, results, menu = 6 inputs
-    _, consumed = _run(_n("city"), "Lyon", "", "", "q", "q")
+    # company: a single refinement (city) -> menu, primary, city, keyword, results, menu = 6 inputs
+    _, consumed = _run(_n("company"), "Acme", "", "", "q", "q")
     assert consumed == 6
     # username: 2 refinements -> one more input
     _, consumed = _run(_n("username"), "kalira", "", "", "", "q", "q")
@@ -62,8 +62,8 @@ def test_refinement_value_crosses_into_dorks() -> None:
 
 
 def test_new_search_same_mode_reuses_mode() -> None:
-    text, _ = _run(_n("city"), "Lyon", "", "", "2", "Paris", "", "", "q", "q")
-    assert "Lyon" in text and "Paris" in text
+    text, _ = _run(_n("company"), "Acme", "", "", "2", "Initech", "", "", "q", "q")
+    assert "Acme" in text and "Initech" in text
 
 
 def test_save_writes_file(tmp_path: Path) -> None:

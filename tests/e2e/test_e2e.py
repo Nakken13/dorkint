@@ -21,7 +21,6 @@ NO_NETWORK = (
 VALUES = {
     "fullname": "Jean Dupont",
     "username": "jdupont",
-    "city": "Lyon",
     "site": "exemple.fr",
     "email": "jean.dupont@exemple.fr",
     "phone": "06 12 34 56 78",
@@ -78,7 +77,7 @@ def test_out_file_and_overwrite_protection(tmp_path: Path) -> None:
     [
         (["unknown", "x"], "Unknown mode"),
         (["email"], "missing primary value"),
-        (["city", "Lyon", "--city", "Paris"], "refinement"),
+        (["site", "exemple.fr", "--city", "Paris"], "refinement"),
     ],
 )
 def test_argument_errors(args: list[str], message: str) -> None:

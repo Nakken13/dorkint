@@ -9,8 +9,8 @@ from dorkint.cli import MODES, app
 runner = CliRunner()
 
 
-def test_seven_modes_declared() -> None:
-    assert tuple(MODES) == ("fullname", "username", "city", "site", "email", "phone", "company")
+def test_six_modes_declared() -> None:
+    assert tuple(MODES) == ("fullname", "username", "site", "email", "phone", "company")
 
 
 def test_version() -> None:
@@ -76,7 +76,7 @@ def test_refinement_adds_links() -> None:
 
 
 def test_unsupported_refinement_is_a_clean_error() -> None:
-    result = runner.invoke(app, ["city", "Lyon", "--city", "Paris"])
+    result = runner.invoke(app, ["site", "exemple.fr", "--city", "Paris"])
     assert result.exit_code == 2
     assert "refinement" in result.output
 

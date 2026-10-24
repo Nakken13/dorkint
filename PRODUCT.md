@@ -25,8 +25,8 @@ Python ou Java envisagés).
 
 Périmètre fonctionnel déjà défini par brainstorming :
 
-- 7 modes de recherche au lancement : `nom prénom`, `username`, `ville`,
-  `site`, `mail`, `tel`, `entreprise`.
+- 6 modes de recherche : `nom prénom`, `username`, `site`, `mail`, `tel`,
+  `entreprise` (la `ville` n'est pas un mode : c'est un champ d'affinage).
 - Pour chaque mode, un champ principal obligatoire + champs d'affinage
   optionnels (ex. `nom prénom` + `ville`/`entreprise` connues) qui enrichissent
   les dorks générés par des variantes croisées.
