@@ -28,6 +28,8 @@ def test_primary_value_is_quoted() -> None:
         for dork in dorks:
             if category == "Local part and domain" and "site:jean" not in dork and '"jean"' in dork:
                 continue  # dorks on the local part only
+            if category == "Obfuscated forms":
+                continue  # anti-spam spellings of the address (jean at exemple dot fr)
             assert f'"{ADRESSE}"' in dork
 
 

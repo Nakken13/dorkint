@@ -34,6 +34,8 @@ def test_every_category_has_dork_with_quoted_principal() -> None:
     for category in MODES["fullname"].CATEGORIES:
         dorks = result.get(category)
         assert dorks, f"empty category: {category}"
+        if category == "Name variants":
+            continue  # built from first / last name, not the full quoted name
         assert all(f'"{PRINCIPAL}"' in d for d in dorks)
 
 

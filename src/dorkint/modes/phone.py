@@ -59,4 +59,20 @@ CATEGORIES = {
         'intext:contact {primary} {company}',
         'inurl:contact {primary} {city}',
     ],
+    'Operator crossings': [
+        '{primary} (ext:pdf OR ext:docx OR ext:xlsx OR ext:pptx)',
+        '{primary} (inurl:contact OR inurl:mentions-legales OR inurl:cgv OR inurl:a-propos)',
+        '{primary} (intitle:contact OR intitle:"mentions légales")',
+        '{primary} (intext:fax OR intext:mobile OR intext:tél)',
+        '{primary} -site:pagesjaunes.fr -site:118712.fr -site:facebook.com -site:linkedin.com',
+        '{primary} after:2023',
+        '{primary} before:2015',
+        '{primary} {city} (ext:pdf OR ext:docx)',
+        '{primary} {company} (inurl:contact OR inurl:equipe)',
+    ],
+    'Caller reports': [
+        'site:tellows.fr {primary}',
+        '{primary} (avis OR arnaque OR démarchage OR appel)',
+        '{primary} (avis OR arnaque OR démarchage) -site:tellows.fr',
+    ],
 }

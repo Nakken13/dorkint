@@ -27,8 +27,11 @@ def test_each_category_has_at_least_one_dork() -> None:
 
 def test_main_value_injected_and_quoted() -> None:
     result = generate("username", "jdupont42", {})
-    for dorks in result.values():
+    for category, dorks in result.items():
         for dork in dorks:
+            if category == "Username variants":
+                assert "jdupont42" in dork  # raw handle: URL, @mention, anchor...
+                continue
             assert '"jdupont42"' in dork
 
 

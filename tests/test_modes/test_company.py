@@ -10,6 +10,8 @@ CATEGORIES = (
     "Press and social networks",
     "Subdomains and exposed files",
     "Executives and officers",
+    "Operator crossings",
+    "Public procurement and IP",
 )
 FORBIDDEN = ("password", "passwd", "mot de passe", "secret", "token", "api_key", ".env", "credentials", "id_rsa", "dump")
 

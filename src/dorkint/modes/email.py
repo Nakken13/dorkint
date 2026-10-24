@@ -4,11 +4,17 @@ import re
 
 
 def values(address):
-    """`{local}` and `{domain}`, only when the input is an address."""
+    """`{local}`, `{domain}` and `{obfuscated}` (anti-spam spellings), only when the input is an address."""
     if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", address, re.IGNORECASE):
         return {}
     local, _, domain = address.partition("@")
-    return {"local": f'"{local}"', "domain": domain}
+    spelled = domain.replace(".", " dot ")
+    forms = [f"{local} at {domain}", f"{local} [at] {domain}", f"{local} (at) {domain}", f"{local} at {spelled}"]
+    return {
+        "local": f'"{local}"',
+        "domain": domain,
+        "obfuscated": "(" + " OR ".join(f'"{f}"' for f in forms) + ")",
+    }
 
 
 CATEGORIES = {
@@ -71,5 +77,23 @@ CATEGORIES = {
         'intitle:{primary}',
         '{primary} -site:linkedin.com -site:facebook.com',
         '{primary} -site:linkedin.com {company}',
+    ],
+    'Obfuscated forms': [
+        '{obfuscated}',
+        '{obfuscated} -site:{domain}',
+        '{local} AROUND(5) {domain}',
+        'intext:{local} site:{domain} (ext:pdf OR ext:docx)',
+    ],
+    'Operator crossings': [
+        'allintext:{primary}',
+        'allintitle:{primary}',
+        'inanchor:{primary}',
+        'intext:{primary} (ext:pdf OR ext:doc OR ext:docx OR ext:ppt OR ext:pptx OR ext:odt)',
+        '{primary} (inurl:contact OR inurl:equipe OR inurl:team OR inurl:about)',
+        '{primary} after:2023',
+        '{primary} before:2015',
+        'intext:{primary} {city} (ext:pdf OR ext:docx)',
+        'allintext:{primary} {company}',
+        '{primary} {company} (inurl:contact OR inurl:equipe OR inurl:team)',
     ],
 }
