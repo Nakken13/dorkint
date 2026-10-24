@@ -4,7 +4,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from urllib.parse import quote_plus
 
-from dorkint.builder import Dork, DorkintError, Mode
+from dorkint.builder import DorkintError, needs, refinements_of
+from dorkint.modes import MODES
 
 _GOOGLE = "https://www.google.com/search?q="
 
@@ -13,25 +14,25 @@ def to_google_url(query: str) -> str:
     return _GOOGLE + quote_plus(query)
 
 
-def format_dorks(groups: Mapping[str, Sequence[Dork]]) -> str:
+def format_dorks(groups: Mapping[str, Sequence[str]]) -> str:
     """One URL per line under a `## Category` header (nothing that breaks ctrl+click)."""
     blocks = [
-        "\n".join([f"## {category}", *(to_google_url(d.query) for d in dorks)])
+        "\n".join([f"## {category}", *(to_google_url(d) for d in dorks)])
         for category, dorks in groups.items()
     ]
     return "\n\n".join(blocks)
 
 
-def format_info(modes: Sequence[Mode]) -> str:
+def format_info() -> str:
     """Raw patterns of each mode; `[...]` = required refinements (`--x`) or derived values."""
     blocks = []
-    for mode in modes:
-        lines = [f"# {mode.name}"]
-        for category in mode.categories:
-            lines.append(f"## {category.name}")
-            for t in category.templates:
-                required = ", ".join(f"--{r}" if r in mode.refinements else r for r in t.requires)
-                lines.append(f"{t.pattern}  [{required}]" if required else t.pattern)
+    for name, mode in MODES.items():
+        lines = [f"# {name}"]
+        for category, patterns in mode.CATEGORIES.items():
+            lines.append(f"## {category}")
+            for pattern in patterns:
+                required = ", ".join(f"--{n}" if n in refinements_of(name) else n for n in needs(pattern))
+                lines.append(f"{pattern}  [{required}]" if required else pattern)
         blocks.append("\n".join(lines))
     return "\n\n".join(blocks)
 

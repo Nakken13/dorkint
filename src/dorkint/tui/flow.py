@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import NamedTuple
 
 from dorkint.banner import banner
-from dorkint.builder import Dork, DorkintError, generate, get_mode
-from dorkint.cli import MODES
+from dorkint.builder import DorkintError, generate, refinements_of
+from dorkint.modes import MODES
 from dorkint.output import format_dorks, save
 from dorkint.tui.prompts import InputFn, PrintFn, ask, choose
 from dorkint.visual import render_cards, render_html
@@ -19,7 +19,7 @@ OpenFn = Callable[[str], object]
 
 class _Results(NamedTuple):
     text: str
-    groups: Mapping[str, Sequence[Dork]]
+    groups: Mapping[str, Sequence[str]]
     title: str
 
 
@@ -35,7 +35,7 @@ def _search(mode: str, input_fn: InputFn, print_fn: PrintFn) -> _Results | None:
     else:
         primary = ask("Value to search for", optional=False, input_fn=input_fn, print_fn=print_fn)
     refinements = {
-        r: ask(_REFINEMENT_LABELS.get(r, r), input_fn=input_fn, print_fn=print_fn) for r in get_mode(mode).refinements
+        r: ask(_REFINEMENT_LABELS.get(r, r), input_fn=input_fn, print_fn=print_fn) for r in refinements_of(mode)
     }
     keyword = ask("Keyword (e.g. minecraft)", input_fn=input_fn, print_fn=print_fn)
     try:
@@ -80,7 +80,7 @@ def _after_results(results: _Results, mode: str, input_fn: InputFn, print_fn: Pr
             print_fn(f"Links saved to '{path}'.")
 
 
-_CLEAR_SCREEN = "[2J[3J[H"
+_CLEAR_SCREEN = "\x1b[2J\x1b[3J\x1b[H"
 
 
 def show_banner(print_fn: PrintFn) -> None:
@@ -88,8 +88,8 @@ def show_banner(print_fn: PrintFn) -> None:
 
 
 def run(input_fn: InputFn = input, print_fn: PrintFn = print, open_fn: OpenFn = webbrowser.open) -> None:
-    while (index := choose("Search mode", MODES, back="Quit", input_fn=input_fn, print_fn=print_fn)) is not None:
-        mode = MODES[index]
+    while (index := choose("Search mode", list(MODES), back="Quit", input_fn=input_fn, print_fn=print_fn)) is not None:
+        mode = list(MODES)[index]
         while (results := _search(mode, input_fn, print_fn)) is not None:
             if not _after_results(results, mode, input_fn, print_fn, open_fn):
                 break

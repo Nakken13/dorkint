@@ -2,6 +2,8 @@
 
 import shutil
 
+from dorkint import __version__
+
 _EYE = (
     "⠀              ⣀⣀⣀⡀⢰⠆⠂⠄⡀⠀⠀⠀⠀⠀⠀",
     "⠁⠀⠀⠀⠀⠀⠈⢀⢠⠴⠒⢿⣉⣦⣱⡇⣧⢼⣯⣿⠲⣥⣀⡀⠁⠠⠀⠀⠀⠀",
@@ -23,10 +25,11 @@ _TITLE = (
 
 
 def banner() -> str:
-    """Eye then `Dorkint`, each centered on the terminal."""
+    """Eye, `Dorkint`, then version and author, each centered on the terminal."""
     eye_width = max(len(line) for line in _EYE)
     title_width = max(len(line) for line in _TITLE)
     terminal = shutil.get_terminal_size((80, 24)).columns
     lines = [line.ljust(eye_width).center(terminal).rstrip() for line in _EYE]
     lines += [line.ljust(title_width).center(terminal).rstrip() for line in _TITLE]
+    lines.append(f"v{__version__} - Made by Nakken".center(terminal).rstrip())
     return "\n".join(lines) + "\n"

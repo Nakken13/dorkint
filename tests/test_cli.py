@@ -10,7 +10,7 @@ runner = CliRunner()
 
 
 def test_seven_modes_declared() -> None:
-    assert MODES == ("fullname", "username", "city", "site", "email", "phone", "company")
+    assert tuple(MODES) == ("fullname", "username", "city", "site", "email", "phone", "company")
 
 
 def test_version() -> None:
@@ -20,24 +20,22 @@ def test_version() -> None:
 
 
 def test_info_lists_every_mode_category_and_pattern() -> None:
-    from dorkint import builder
-
     result = runner.invoke(app, ["--info"])
     assert result.exit_code == 0
     for mode in MODES:
         assert f"# {mode}" in result.output
     for mode in MODES:
-        for category in builder.get_mode(mode).categories:
-            assert f"## {category.name}" in result.output
-            for template in category.templates:
-                assert template.pattern in result.output
+        for category, patterns in MODES[mode].CATEGORIES.items():
+            assert f"## {category}" in result.output
+            for pattern in patterns:
+                assert pattern in result.output
     assert "https://" not in result.output
 
 
 def test_info_flags_templates_needing_refinements() -> None:
     result = runner.invoke(app, ["--info"])
     assert "{primary} {city}  [--city]" in result.output
-    assert "{local} site:{domain:raw}  [local, domain]" in result.output
+    assert "{local} site:{domain}  [local, domain]" in result.output
 
 
 def test_help_lists_every_mode() -> None:
@@ -60,13 +58,6 @@ def test_missing_value_error(mode: str) -> None:
     assert result.exit_code != 0
     assert "value" in result.output.lower()
     assert "missing" in result.output.lower()
-
-
-def test_registered_modes_match_cli_modes() -> None:
-    from dorkint import builder
-
-    builder.load_modes()
-    assert set(builder._REGISTRY) == set(MODES)
 
 
 @pytest.mark.parametrize("mode", MODES)

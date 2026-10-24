@@ -38,35 +38,27 @@ fichier `.env` ni de clé d'API si une est ajoutée plus tard.
 
 ## Déclarer un mode
 
-Un fichier `src/dorkint/modes/<mode>.py` (tirets du nom CLI → underscores),
-découvert automatiquement par `builder.load_modes()` : aucun fichier partagé à
-éditer.
+Un fichier `src/dorkint/modes/<mode>.py` + une ligne dans `MODES` (`modes/__init__.py`,
+qui sert aussi de liste des sous-commandes CLI). Pas de classe : un dict de patrons.
 
 ```python
-from dorkint.builder import Category, Mode, Template, register
-
-register(Mode(
-    name="fullname",                 # nom de la sous-commande CLI
-    refinements=("city", "company"),
-    categories=(
-        Category("Réseaux sociaux", (
-            Template("site:linkedin.com/in {principal}"),
-            Template("site:linkedin.com/in {principal} {city}", requires=("city",)),
-        )),
-    ),
-))
+CATEGORIES = {
+    "Réseaux sociaux": [
+        "site:linkedin.com/in {primary}",
+        "site:linkedin.com/in {primary} {city}",
+    ],
+}
 ```
 
-- `{principal}`, `{city}`... sont insérés entre guillemets ; `{x:raw}` sans guillemets.
-- `requires` : le patron n'est généré que si tous ces affinages sont fournis.
-- `Mode(variantes=fn)` : `{principal}` devient `("a" OR "b")` (ex. écritures d'un numéro, `modes/tel.py`) ; `{principal:raw}` ignore les variantes ; limite Google ~32 mots par requête.
-- `Mode(derive=fn, derived=("local",...))` : valeurs calculées utilisables comme `{local}` / `requires` (ex. `modes/mail.py`).
+- `{primary}`, `{city}`, `{company}` sont insérés entre guillemets ; `{raw}` = la valeur telle quelle.
+- Un patron n'est généré que si tous ses placeholders ont une valeur ; les affinages d'un mode sont déduits de ses patrons.
+- `values(value)` (optionnel) : renvoie des placeholders en plus ou en remplacement (`modes/phone.py` : `{primary}` devient `("a" OR "b")`, limite Google ~32 mots ; `modes/email.py` : `{local}` / `{domain}`).
 - Tests du mode : `tests/test_modes/test_<mode>.py` ; jamais de catégorie credentials.
 
 ## Garde-fou credentials
 
-`builder.register` refuse tout mode dont une catégorie ou un template contient un
-terme de `dorkint.guardrails.TERMES_INTERDITS` (password, secret, token, .env,
+`tests/test_guardrails.py` échoue si une catégorie ou un patron d'un mode contient un
+terme de `dorkint.guardrails.FORBIDDEN_TERMS` (password, secret, token, .env,
 id_rsa, dump...). Dorkint ne cible jamais credentials ni secrets de tiers
-(`PRODUCT.md`, hors scope). Pour ajouter un terme : l'ajouter à la liste ; un test
-global (`tests/test_guardrails.py`) vérifie tous les modes chargés.
+(`PRODUCT.md`, hors scope). Pour ajouter un terme : l'ajouter à la liste ; ce test
+global vérifie tous les modes (seule exception : patrons `site:{raw} ...` du mode `site`).

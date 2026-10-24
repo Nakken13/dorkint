@@ -1,59 +1,56 @@
 """Mode `username`: search for a username on public sources."""
 
-from dorkint.builder import Category, Mode, Template, register
-
-_SOCIAL = (
-    "github.com", "x.com", "twitter.com", "instagram.com",
-    "tiktok.com", "reddit.com", "youtube.com", "linkedin.com", "twitch.tv",
-)
-
-register(Mode(
-    name="username",
-    refinements=("city", "company"),
-    categories=(
-        Category("Social network profiles", (
-            *(Template(f"site:{site} {{primary}}") for site in _SOCIAL),
-            Template("site:linkedin.com/in {primary} {city}", requires=("city",)),
-            Template("site:linkedin.com/in {primary} {company}", requires=("company",)),
-            Template("site:instagram.com {primary} {city}", requires=("city",)),
-        )),
-        Category("Forums and communities", (
-            Template("site:stackoverflow.com/users {primary}"),
-            Template("site:forum.ubuntu-fr.org {primary}"),
-            Template("site:commentcamarche.net {primary}"),
-            Template("site:jeuxvideo.com {primary}"),
-            Template("{primary} forum inurl:profil site:.fr"),
-            Template("{primary} forum {city}", requires=("city",)),
-        )),
-        Category("Code and repositories", (
-            Template("site:github.com {primary} -inurl:blob"),
-            Template("site:gitlab.com {primary}"),
-            Template("site:pastebin.com {primary}"),
-            Template("site:dev.to {primary}"),
-            Template("site:github.com {primary} {company}", requires=("company",)),
-        )),
-        Category("Portfolios and blogs", (
-            Template("{primary} portfolio"),
-            Template("{primary} blog auteur"),
-            Template("site:medium.com {primary}"),
-            Template("site:over-blog.com {primary}"),
-            Template("{primary} portfolio {city}", requires=("city",)),
-            Template("{primary} blog {company}", requires=("company",)),
-        )),
-        Category("Mentions in PDFs", (
-            Template("filetype:pdf {primary}"),
-            Template("filetype:pdf {primary} site:.fr"),
-            Template("filetype:pdf {primary} {city}", requires=("city",)),
-            Template("filetype:pdf {primary} {company}", requires=("company",)),
-            Template("filetype:pdf {primary} {city} {company}", requires=("city", "company")),
-        )),
-        Category("Press mentions", (
-            Template("{primary} site:lemonde.fr"),
-            Template("{primary} site:lefigaro.fr"),
-            Template("{primary} site:ouest-france.fr"),
-            Template("{primary} actualités site:.fr"),
-            Template("{primary} {city} site:.fr", requires=("city",)),
-            Template("{primary} {company} site:.fr", requires=("company",)),
-        )),
-    ),
-))
+CATEGORIES = {
+    'Social network profiles': [
+        'site:github.com {primary}',
+        'site:x.com {primary}',
+        'site:twitter.com {primary}',
+        'site:instagram.com {primary}',
+        'site:tiktok.com {primary}',
+        'site:reddit.com {primary}',
+        'site:youtube.com {primary}',
+        'site:linkedin.com {primary}',
+        'site:twitch.tv {primary}',
+        'site:linkedin.com/in {primary} {city}',
+        'site:linkedin.com/in {primary} {company}',
+        'site:instagram.com {primary} {city}',
+    ],
+    'Forums and communities': [
+        'site:stackoverflow.com/users {primary}',
+        'site:forum.ubuntu-fr.org {primary}',
+        'site:commentcamarche.net {primary}',
+        'site:jeuxvideo.com {primary}',
+        '{primary} forum inurl:profil site:.fr',
+        '{primary} forum {city}',
+    ],
+    'Code and repositories': [
+        'site:github.com {primary} -inurl:blob',
+        'site:gitlab.com {primary}',
+        'site:pastebin.com {primary}',
+        'site:dev.to {primary}',
+        'site:github.com {primary} {company}',
+    ],
+    'Portfolios and blogs': [
+        '{primary} portfolio',
+        '{primary} blog auteur',
+        'site:medium.com {primary}',
+        'site:over-blog.com {primary}',
+        '{primary} portfolio {city}',
+        '{primary} blog {company}',
+    ],
+    'Mentions in PDFs': [
+        'filetype:pdf {primary}',
+        'filetype:pdf {primary} site:.fr',
+        'filetype:pdf {primary} {city}',
+        'filetype:pdf {primary} {company}',
+        'filetype:pdf {primary} {city} {company}',
+    ],
+    'Press mentions': [
+        '{primary} site:lemonde.fr',
+        '{primary} site:lefigaro.fr',
+        '{primary} site:ouest-france.fr',
+        '{primary} actualités site:.fr',
+        '{primary} {city} site:.fr',
+        '{primary} {company} site:.fr',
+    ],
+}

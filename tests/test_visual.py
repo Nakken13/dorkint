@@ -1,12 +1,11 @@
 import re
 
-from dorkint.builder import Dork
 from dorkint.output import to_google_url
 from dorkint.visual import dork_label, render_cards, render_html
 
 GROUPS = {
-    "Social networks": [Dork("Social networks", 'site:x.com "a&b"'), Dork("Social networks", "site:y.com a")],
-    "Documents": [Dork("Documents", "filetype:pdf a")],
+    "Social networks": ['site:x.com "a&b"', "site:y.com a"],
+    "Documents": ["filetype:pdf a"],
 }
 
 
@@ -34,7 +33,7 @@ def test_html_links_are_google_urls_and_hidden_behind_labels() -> None:
 
 
 def test_html_escapes_untrusted_text() -> None:
-    evil = {"<script>alert(1)</script>": [Dork("c", '"><img src=x onerror=alert(1)>')]}
+    evil = {"<script>alert(1)</script>": [('"><img src=x onerror=alert(1)>')]}
     html = render_html(evil, title="<b>t</b>")
     assert "<script>alert(1)" not in html
     assert "<img src=x" not in html

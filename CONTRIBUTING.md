@@ -12,6 +12,6 @@ ces termes (`src/dorkint/guardrails.py`) et la CI échoue (`tests/test_guardrail
 ## Ajouter un mode
 
 1. Écrire d'abord `tests/test_modes/test_<mode>.py` (mode enregistré, au moins un dork par catégorie, valeur entre guillemets, affinages croisés).
-2. Créer `src/dorkint/modes/<mode>.py` avec `register(Mode(...))` (voir `AGENTS.md`, « Déclarer un mode »).
-3. Ajouter le nom du mode à `MODES` dans `src/dorkint/cli.py`.
-4. Sources France uniquement ; aucune catégorie credentials (le registre la refuse).
+2. Créer `src/dorkint/modes/<mode>.py` avec un dict `CATEGORIES` (voir `AGENTS.md`, « Déclarer un mode »).
+3. Ajouter le module à `MODES` dans `src/dorkint/modes/__init__.py`.
+4. Sources France uniquement ; aucune catégorie credentials (`tests/test_guardrails.py` la refuse).

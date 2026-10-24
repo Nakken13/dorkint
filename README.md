@@ -80,8 +80,8 @@ interactive terminal. Use `dorkint --help` for the help.
 
 ## Adding a mode
 
-A file `src/dorkint/modes/<mode>.py` calls `register(Mode(...))`: it is
-discovered automatically, with no shared file to edit. Details and an example
+A file `src/dorkint/modes/<mode>.py` holds a `CATEGORIES` dict of query patterns,
+plus one line in `MODES` (`src/dorkint/modes/__init__.py`). Details and an example
 in [AGENTS.md](AGENTS.md) ("Declaring a mode") and
 [CONTRIBUTING.md](CONTRIBUTING.md).
 

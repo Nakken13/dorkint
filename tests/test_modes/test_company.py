@@ -1,6 +1,7 @@
 import pytest
 
-from dorkint.builder import generate, get_mode
+from dorkint.builder import generate, refinements_of
+from dorkint.modes import MODES
 
 CATEGORIES = (
     "FR registers",
@@ -14,12 +15,12 @@ FORBIDDEN = ("password", "passwd", "mot de passe", "secret", "token", "api_key",
 
 
 def _all_queries(result: dict) -> list[str]:
-    return [d.query for dorks in result.values() for d in dorks]
+    return [d for dorks in result.values() for d in dorks]
 
 
 def test_mode_registered() -> None:
-    assert get_mode("company").name == "company"
-    assert "city" in get_mode("company").refinements
+    assert "company" in MODES
+    assert "city" in refinements_of("company")
 
 
 def test_every_category_has_dork() -> None:

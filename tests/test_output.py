@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from dorkint.builder import Dork, DorkintError
+from dorkint.builder import DorkintError
 from dorkint.output import format_dorks, save, to_google_url
 
 BASE = "https://www.google.com/search?q="
@@ -25,8 +25,8 @@ def test_vers_url_google_encodes(query: str, attendu: str) -> None:
 
 def test_format_dorks_groups_by_category_with_one_url_per_line() -> None:
     groups = {
-        "Networks": [Dork("Networks", "site:x.com a"), Dork("Networks", "site:y.com a")],
-        "Press": [Dork("Press", "a presse")],
+        "Networks": ["site:x.com a", "site:y.com a"],
+        "Press": ["a presse"],
     }
     lines = format_dorks(groups).splitlines()
     assert lines[0] == "## Networks"

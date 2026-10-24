@@ -12,7 +12,6 @@ from rich.panel import Panel
 from rich.style import Style
 from rich.text import Text
 
-from dorkint.builder import Dork
 from dorkint.output import to_google_url
 
 _LABEL_MAX = 60
@@ -33,7 +32,7 @@ def _unicode_printable() -> bool:
     return True
 
 
-def render_cards(groups: Mapping[str, Sequence[Dork]], *, color: bool = False) -> str:
+def render_cards(groups: Mapping[str, Sequence[str]], *, color: bool = False) -> str:
     """One panel per category; each label is a hyperlink (OSC 8) in terminals that support it."""
     if not groups:
         return ""
@@ -42,7 +41,7 @@ def render_cards(groups: Mapping[str, Sequence[Dork]], *, color: bool = False) -
     console = Console(file=buffer, width=width, force_terminal=color, color_system="standard" if color else None)
     unicode_ok = _unicode_printable()
     for category, dorks in groups.items():
-        body = Group(*(Text(("▸ " if unicode_ok else "- ") + dork_label(d.query), style=Style(link=to_google_url(d.query))) for d in dorks))
+        body = Group(*(Text(("▸ " if unicode_ok else "- ") + dork_label(d), style=Style(link=to_google_url(d))) for d in dorks))
         console.print(Panel(body, title=f"{category} ({len(dorks)})", title_align="left", box=box.ROUNDED if unicode_ok else box.ASCII))
     return buffer.getvalue().rstrip()
 
@@ -73,12 +72,12 @@ document.getElementById('close').onclick = () => toggle(false);
 """
 
 
-def render_html(groups: Mapping[str, Sequence[Dork]], *, title: str = "Dorkint") -> str:
+def render_html(groups: Mapping[str, Sequence[str]], *, title: str = "Dorkint") -> str:
     cards = []
     for category, dorks in groups.items():
         pills = "".join(
-            f'<a href="{escape(to_google_url(d.query))}" target="_blank" rel="noopener noreferrer">'
-            f"{escape(dork_label(d.query))}</a>"
+            f'<a href="{escape(to_google_url(d))}" target="_blank" rel="noopener noreferrer">'
+            f"{escape(dork_label(d))}</a>"
             for d in dorks
         )
         cards.append(

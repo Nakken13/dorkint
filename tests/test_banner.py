@@ -1,5 +1,6 @@
 from typer.testing import CliRunner
 
+from dorkint import __version__
 from dorkint.banner import banner
 from dorkint.cli import app
 
@@ -14,9 +15,15 @@ def test_banner_fits_a_terminal() -> None:
 
 def test_banner_has_an_eye_above_the_big_title() -> None:
     lines = banner().splitlines()
-    assert len(lines) == 13
+    assert len(lines) == 14
     assert "⣿" in lines[3]
-    assert lines[-1].strip() == TITRE.strip()
+    assert lines[-2].strip() == TITRE.strip()
+
+
+def test_banner_shows_version_and_author_centered() -> None:
+    last = banner().splitlines()[-1]
+    assert last.strip() == f"v{__version__} - Made by Nakken"
+    assert last.startswith(" ")
 
 
 def test_help_shows_banner() -> None:

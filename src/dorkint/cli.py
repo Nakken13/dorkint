@@ -10,11 +10,10 @@ from typer.core import TyperGroup
 
 from dorkint import __version__
 from dorkint.banner import banner
-from dorkint.builder import DorkintError, generate, get_mode
+from dorkint.builder import DorkintError, generate
+from dorkint.modes import MODES
 from dorkint.output import format_dorks, format_info, save
 from dorkint.visual import render_html
-
-MODES = ("fullname", "username", "city", "site", "email", "phone", "company")
 
 
 class _ModeGroup(TyperGroup):
@@ -57,7 +56,7 @@ def _show_version(value: bool) -> None:
 
 def _show_info(value: bool) -> None:
     if value:
-        typer.echo(format_info([get_mode(m) for m in MODES]))
+        typer.echo(format_info())
         raise typer.Exit()
 
 

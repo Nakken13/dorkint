@@ -2,110 +2,74 @@
 
 import re
 
-from dorkint.builder import Category, Mode, Template, register
 
-_ADDRESS = re.compile(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", re.IGNORECASE)
-
-
-def _split(address: str) -> dict[str, str]:
-    """Local part and domain of an address; empty if it is not an address."""
-    if not _ADDRESS.fullmatch(address):
+def values(address):
+    """`{local}` and `{domain}`, only when the input is an address."""
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", address, re.IGNORECASE):
         return {}
     local, _, domain = address.partition("@")
-    return {"local": local, "domain": domain}
+    return {"local": f'"{local}"', "domain": domain}
 
 
-register(
-    Mode(
-        name="email",
-        refinements=("city", "company"),
-        derive=_split,
-        derived=("local", "domain"),
-        categories=(
-            Category(
-                "Mentions web",
-                (
-                    Template("{primary}"),
-                    Template("intext:{primary}"),
-                    Template("{primary} contact"),
-                    Template("{primary} {city}", requires=("city",)),
-                    Template("{primary} {company}", requires=("company",)),
-                    Template("{primary} {company} {city}", requires=("company", "city")),
-                ),
-            ),
-            Category(
-                "PDFs and documents",
-                (
-                    Template("filetype:pdf {primary}"),
-                    Template("filetype:doc OR filetype:docx {primary}"),
-                    Template("filetype:xls OR filetype:xlsx OR filetype:ppt {primary}"),
-                    Template("filetype:pdf {primary} {company}", requires=("company",)),
-                    Template("filetype:pdf {primary} {city}", requires=("city",)),
-                ),
-            ),
-            Category(
-                "Social networks and profiles",
-                (
-                    Template("site:linkedin.com {primary}"),
-                    Template("site:facebook.com OR site:x.com OR site:instagram.com {primary}"),
-                    Template("site:github.com OR site:gitlab.com {primary}"),
-                    Template("site:linkedin.com {primary} {company}", requires=("company",)),
-                    Template("site:linkedin.com OR site:facebook.com {primary} {city}", requires=("city",)),
-                ),
-            ),
-            Category(
-                "Git commits",
-                (
-                    Template("site:github.com inurl:commit {primary}"),
-                    Template("site:gitlab.com inurl:commit {primary}"),
-                    Template("site:github.com inurl:commits {primary}"),
-                    Template("site:bitbucket.org OR site:codeberg.org inurl:commit {primary}"),
-                    Template("intext:\"Author:\" {primary} inurl:commit"),
-                    Template("intext:\"Signed-off-by:\" {primary}"),
-                    Template("intext:\"Co-authored-by:\" {primary}"),
-                    Template("site:lore.kernel.org OR site:marc.info {primary}"),
-                ),
-            ),
-            Category(
-                "Forums and comments",
-                (
-                    Template("inurl:forum {primary}"),
-                    Template("site:reddit.com OR site:stackoverflow.com {primary}"),
-                    Template("intext:{primary} inurl:comment"),
-                    Template("inurl:forum {primary} {city}", requires=("city",)),
-                ),
-            ),
-            Category(
-                "Directories and signatures",
-                (
-                    Template("site:societe.com OR site:pagesjaunes.fr {primary}"),
-                    Template("intitle:annuaire {primary}"),
-                    Template("{primary} cordialement"),
-                    Template("{primary} tél mobile signature"),
-                    Template("site:pagesjaunes.fr {primary} {city}", requires=("city",)),
-                    Template("intitle:annuaire {primary} {company}", requires=("company",)),
-                ),
-            ),
-            Category(
-                "Press and publications",
-                (
-                    Template("{primary} communiqué de presse"),
-                    Template("{primary} auteur publication"),
-                    Template("site:hal.science OR site:researchgate.net {primary}"),
-                    Template("{primary} communiqué {company}", requires=("company",)),
-                ),
-            ),
-            Category(
-                "Local part and domain",
-                (
-                    Template("{local} site:{domain:raw}", requires=("local", "domain")),
-                    Template("{local} -site:{domain:raw}", requires=("local", "domain")),
-                    Template("inurl:{primary}"),
-                    Template("intitle:{primary}"),
-                    Template("{primary} -site:linkedin.com -site:facebook.com"),
-                    Template("{primary} -site:linkedin.com {company}", requires=("company",)),
-                ),
-            ),
-        ),
-    )
-)
+CATEGORIES = {
+    'Mentions web': [
+        '{primary}',
+        'intext:{primary}',
+        '{primary} contact',
+        '{primary} {city}',
+        '{primary} {company}',
+        '{primary} {company} {city}',
+    ],
+    'PDFs and documents': [
+        'filetype:pdf {primary}',
+        'filetype:doc OR filetype:docx {primary}',
+        'filetype:xls OR filetype:xlsx OR filetype:ppt {primary}',
+        'filetype:pdf {primary} {company}',
+        'filetype:pdf {primary} {city}',
+    ],
+    'Social networks and profiles': [
+        'site:linkedin.com {primary}',
+        'site:facebook.com OR site:x.com OR site:instagram.com {primary}',
+        'site:github.com OR site:gitlab.com {primary}',
+        'site:linkedin.com {primary} {company}',
+        'site:linkedin.com OR site:facebook.com {primary} {city}',
+    ],
+    'Git commits': [
+        'site:github.com inurl:commit {primary}',
+        'site:gitlab.com inurl:commit {primary}',
+        'site:github.com inurl:commits {primary}',
+        'site:bitbucket.org OR site:codeberg.org inurl:commit {primary}',
+        'intext:"Author:" {primary} inurl:commit',
+        'intext:"Signed-off-by:" {primary}',
+        'intext:"Co-authored-by:" {primary}',
+        'site:lore.kernel.org OR site:marc.info {primary}',
+    ],
+    'Forums and comments': [
+        'inurl:forum {primary}',
+        'site:reddit.com OR site:stackoverflow.com {primary}',
+        'intext:{primary} inurl:comment',
+        'inurl:forum {primary} {city}',
+    ],
+    'Directories and signatures': [
+        'site:societe.com OR site:pagesjaunes.fr {primary}',
+        'intitle:annuaire {primary}',
+        '{primary} cordialement',
+        '{primary} tél mobile signature',
+        'site:pagesjaunes.fr {primary} {city}',
+        'intitle:annuaire {primary} {company}',
+    ],
+    'Press and publications': [
+        '{primary} communiqué de presse',
+        '{primary} auteur publication',
+        'site:hal.science OR site:researchgate.net {primary}',
+        '{primary} communiqué {company}',
+    ],
+    'Local part and domain': [
+        '{local} site:{domain}',
+        '{local} -site:{domain}',
+        'inurl:{primary}',
+        'intitle:{primary}',
+        '{primary} -site:linkedin.com -site:facebook.com',
+        '{primary} -site:linkedin.com {company}',
+    ],
+}

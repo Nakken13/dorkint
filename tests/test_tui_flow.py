@@ -25,7 +25,7 @@ def _run(*answers: str, open_fn=None) -> tuple[str, int]:
 
 
 def _n(mode: str) -> str:
-    return str(MODES.index(mode) + 1)
+    return str(list(MODES).index(mode) + 1)
 
 
 def test_quit_from_main_menu() -> None:
