@@ -54,6 +54,19 @@ register(
                 ),
             ),
             Category(
+                "Git commits",
+                (
+                    Template("site:github.com inurl:commit {primary}"),
+                    Template("site:gitlab.com inurl:commit {primary}"),
+                    Template("site:github.com inurl:commits {primary}"),
+                    Template("site:bitbucket.org OR site:codeberg.org inurl:commit {primary}"),
+                    Template("intext:\"Author:\" {primary} inurl:commit"),
+                    Template("intext:\"Signed-off-by:\" {primary}"),
+                    Template("intext:\"Co-authored-by:\" {primary}"),
+                    Template("site:lore.kernel.org OR site:marc.info {primary}"),
+                ),
+            ),
+            Category(
                 "Forums and comments",
                 (
                     Template("inurl:forum {primary}"),

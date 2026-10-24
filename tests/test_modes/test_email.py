@@ -93,3 +93,12 @@ def test_value_without_at_sign_has_no_local_domain_variants() -> None:
 def test_invalid_address_has_no_derived_values(entry: str) -> None:
     requetes = [d.query for d in generate("email", entry)["Local part and domain"]]
     assert not any("site:exemple" in q or "site:localhost" in q or "site:c.fr" in q for q in requetes)
+
+
+def test_git_commit_dorks_target_code_hosts_with_the_quoted_address() -> None:
+    dorks = generate("email", ADRESSE)["Git commits"]
+    queries = [d.query for d in dorks]
+    assert any("site:github.com" in q and "commit" in q for q in queries)
+    assert any("site:gitlab.com" in q and "commit" in q for q in queries)
+    assert any("Signed-off-by" in q for q in queries)
+    assert all(f'"{ADRESSE}"' in q for q in queries)
