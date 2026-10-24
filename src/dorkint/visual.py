@@ -7,6 +7,7 @@ from html import escape
 from io import StringIO
 
 from rich import box
+from rich.align import Align
 from rich.console import Console, Group
 from rich.panel import Panel
 from rich.rule import Rule
@@ -57,9 +58,9 @@ def render_menu(
     color: bool = False,
 ) -> str:
     """Numbered menu in a panel: key badge, option name, dimmed hint; the back key sits below a rule."""
-    width = min(shutil.get_terminal_size((80, 24)).columns, 64)
+    terminal = shutil.get_terminal_size((80, 24)).columns
     buffer = StringIO()
-    console = Console(file=buffer, width=width, force_terminal=color, color_system="standard" if color else None)
+    console = Console(file=buffer, width=terminal, force_terminal=color, color_system="standard" if color else None)
     unicode_ok = _unicode_printable()
     rows = Table.grid(padding=(0, 2))
     rows.add_column(justify="right")
@@ -73,17 +74,17 @@ def render_menu(
     back_row.add_column(justify="right")
     back_row.add_column()
     back_row.add_row(Text("[q]", style="bold red"), Text(back, style="dim"))
-    console.print(
-        Panel(
-            Group(rows, Text(""), rule, back_row),
-            title=Text(title, style="bold"),
-            title_align="left",
-            box=box.ROUNDED if unicode_ok else box.ASCII,
-            border_style="cyan",
-            padding=(1, 2),
-        )
+    panel = Panel(
+        Group(rows, rule, back_row),
+        title=Text(title, style="bold"),
+        title_align="left",
+        box=box.ROUNDED if unicode_ok else box.ASCII,
+        border_style="cyan",
+        padding=(0, 2),
+        width=min(terminal, 64),
     )
-    return buffer.getvalue().rstrip()
+    console.print(Align.center(panel))
+    return "\n".join(line.rstrip() for line in buffer.getvalue().splitlines())
 
 
 _CSS = """
