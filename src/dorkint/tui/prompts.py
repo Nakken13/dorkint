@@ -3,7 +3,7 @@
 import sys
 from collections.abc import Callable, Sequence
 
-from dorkint.visual import render_menu
+from dorkint.visual import menu_prompt, render_menu
 
 InputFn = Callable[[str], str]
 PrintFn = Callable[[str], None]
@@ -13,17 +13,25 @@ def choose(
     title: str,
     options: Sequence[str],
     *,
-    hints: Sequence[str] = (),
+    columns: int = 1,
     back: str = "Back",
+    on_info: Callable[[], None] | None = None,
     input_fn: InputFn = input,
     print_fn: PrintFn = print,
 ) -> int | None:
-    """Numbered menu; returns the 0-based index of the option, or None for `q` (back)."""
-    print_fn("\n" + render_menu(title, options, hints=hints, back=back, color=sys.stdout.isatty()))
+    """Numbered menu; returns the 0-based index of the option, or None for `q` (back).
+
+    With `on_info`, an extra `0` entry calls it, then the menu is shown again."""
+    color = sys.stdout.isatty()
+    print_fn("\n" + render_menu(title, options, columns=columns, back=back, info=on_info is not None, color=color))
     while True:
-        entry = input_fn("> ").strip()
+        entry = input_fn(menu_prompt(color=color)).strip()
         if entry.lower() == "q":
             return None
+        if entry == "0" and on_info is not None:
+            on_info()
+            print_fn("\n" + render_menu(title, options, columns=columns, back=back, info=True, color=color))
+            continue
         if entry.isdigit() and 1 <= int(entry) <= len(options):
             return int(entry) - 1
         print_fn(f"Invalid choice: enter a number between 1 and {len(options)}, or q.")

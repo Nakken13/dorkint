@@ -12,7 +12,7 @@ from dorkint.builder import DorkintError, generate, refinements_of
 from dorkint.modes import MODES
 from dorkint.output import format_dorks, save
 from dorkint.tui.prompts import InputFn, PrintFn, ask, choose
-from dorkint.visual import render_cards, render_html
+from dorkint.visual import render_cards, render_html, render_info
 
 OpenFn = Callable[[str], object]
 
@@ -23,15 +23,12 @@ class _Results(NamedTuple):
     title: str
 
 
-_MODE_HINTS = {
-    "fullname": "first + last name",
-    "username": "handle across platforms",
-    "city": "people tied to a town",
-    "site": "everything on a domain",
-    "email": "address, leaks, commits",
-    "phone": "number lookups",
-    "company": "employees and traces",
-}
+_ABOUT = (
+    "Dorkint automates the writing of Google dorks for OSINT reconnaissance.",
+    "Pick a mode, give it a target, and get ready-made queries grouped by category.",
+    "It never scrapes or runs a search: you open the links yourself.",
+    "Only use it on targets you are authorized to look into.",
+)
 
 _REFINEMENT_LABELS = {"city": "Known city", "company": "Known company"}
 
@@ -94,14 +91,18 @@ _CLEAR_SCREEN = "\x1b[2J\x1b[3J\x1b[H"
 
 
 def show_banner(print_fn: PrintFn) -> None:
-    print_fn(_CLEAR_SCREEN + banner())
+    print_fn(_CLEAR_SCREEN + banner().rstrip("\n"))  # the menu adds its own leading blank line
 
 
 def run(input_fn: InputFn = input, print_fn: PrintFn = print, open_fn: OpenFn = webbrowser.open) -> None:
     modes = list(MODES)
-    hints = [_MODE_HINTS.get(m, "") for m in modes]
+    def show_about() -> None:
+        print_fn("\n" + render_info("About dorkint", _ABOUT, color=sys.stdout.isatty()))
+
     while (
-        index := choose("Search mode", modes, hints=hints, back="Quit", input_fn=input_fn, print_fn=print_fn)
+        index := choose(
+            "Search mode", modes, columns=3, back="Quit", on_info=show_about, input_fn=input_fn, print_fn=print_fn
+        )
     ) is not None:
         mode = list(MODES)[index]
         while (results := _search(mode, input_fn, print_fn)) is not None:

@@ -53,27 +53,36 @@ def render_menu(
     title: str,
     options: Sequence[str],
     *,
-    hints: Sequence[str] = (),
+    columns: int = 1,
     back: str = "Back",
+    info: bool = False,
     color: bool = False,
 ) -> str:
-    """Numbered menu in a panel: key badge, option name, dimmed hint; the back key sits below a rule."""
+    """Numbered menu in a panel: key badge + option name laid out row by row over `columns` columns;
+    the info and back keys sit below a rule."""
     terminal = shutil.get_terminal_size((80, 24)).columns
     buffer = StringIO()
-    console = Console(file=buffer, width=terminal, force_terminal=color, color_system="standard" if color else None)
+    console = Console(file=buffer, width=terminal, force_terminal=color, color_system="256" if color else None)
     unicode_ok = _unicode_printable()
-    rows = Table.grid(padding=(0, 2))
-    rows.add_column(justify="right")
-    rows.add_column(no_wrap=True)
-    rows.add_column(overflow="ellipsis", no_wrap=True)
-    for number, option in enumerate(options, start=1):
-        hint = hints[number - 1] if number <= len(hints) else ""
-        rows.add_row(Text(f"[{number}]", style="bold cyan"), Text(option, style="bold"), Text(hint, style="dim"))
+    rows = Table.grid(padding=(0, 2), expand=True)
+    for _ in range(columns):
+        rows.add_column(justify="right")
+        rows.add_column(no_wrap=True, ratio=1)
+    cells = [
+        (Text(f"[{number}]", style="bold cyan"), Text(option, style="bold"))
+        for number, option in enumerate(options, start=1)
+    ]
+    for start in range(0, len(cells), columns):
+        line = cells[start : start + columns]
+        missing = columns - len(line)
+        line = [(Text(""), Text(""))] * (missing // 2) + line + [(Text(""), Text(""))] * (missing - missing // 2)
+        rows.add_row(*(cell for pair in line for cell in pair))
     rule = Rule(style="dim", characters="─" if unicode_ok else "-")
-    back_row = Table.grid(padding=(0, 2))
-    back_row.add_column(justify="right")
-    back_row.add_column()
-    back_row.add_row(Text("[q]", style="bold red"), Text(back, style="dim"))
+    keys = Text()
+    if info:
+        keys.append("[0]", style="bold cyan").append("  Info", style="dim").append("        ")
+    keys.append("[q]", style="bold color(208)").append(f"  {back}", style="dim")
+    back_row = Align.center(keys)
     panel = Panel(
         Group(rows, rule, back_row),
         title=Text(title, style="bold"),
@@ -85,6 +94,31 @@ def render_menu(
     )
     console.print(Align.center(panel))
     return "\n".join(line.rstrip() for line in buffer.getvalue().splitlines())
+
+
+def render_info(title: str, lines: Sequence[str], *, color: bool = False) -> str:
+    """Centered panel (same width as the menu) with one wrapped paragraph per line."""
+    terminal = shutil.get_terminal_size((80, 24)).columns
+    buffer = StringIO()
+    console = Console(file=buffer, width=terminal, force_terminal=color, color_system="256" if color else None)
+    panel = Panel(
+        Group(*(Text(line) for line in lines)),
+        title=Text(title, style="bold"),
+        title_align="left",
+        box=box.ROUNDED if _unicode_printable() else box.ASCII,
+        border_style="cyan",
+        padding=(0, 2),
+        width=min(terminal, 64),
+    )
+    console.print(Align.center(panel))
+    return "\n".join(line.rstrip() for line in buffer.getvalue().splitlines())
+
+
+def menu_prompt(*, color: bool = False) -> str:
+    """Input prompt for the menus: `dorkint ❯ ` (orange when `color`), ASCII `dorkint > ` if needed."""
+    arrow = "❯" if _unicode_printable() else ">"
+    text = f"dorkint {arrow}"
+    return f"\x1b[1;38;5;208m{text}\x1b[0m " if color else f"{text} "
 
 
 _CSS = """

@@ -55,3 +55,18 @@ def test_ask_required_reprompts_until_filled() -> None:
     input_fn, shown = _scripted("", "  ", "Jean")
     assert ask("Valeur", optional=False, input_fn=input_fn, print_fn=lambda *_: None) == "Jean"
     assert len(shown) == 3
+
+
+def test_choose_zero_calls_on_info_then_keeps_asking() -> None:
+    input_fn, _ = _scripted("0", "1")
+    calls: list[str] = []
+    out: list[str] = []
+    assert choose("Mode", ["a"], on_info=lambda: calls.append("info"), input_fn=input_fn, print_fn=out.append) == 0
+    assert calls == ["info"]
+    assert "[0]" in "\n".join(out)
+
+
+def test_choose_zero_is_invalid_without_on_info() -> None:
+    input_fn, shown = _scripted("0", "1")
+    assert choose("Mode", ["a"], input_fn=input_fn, print_fn=lambda *_: None) == 0
+    assert len(shown) == 2
