@@ -15,34 +15,7 @@ from rich.text import Text
 from dorkint.builder import Dork
 from dorkint.output import to_google_url
 
-_ICONS = (
-    ("social", "🌐"),
-    ("press", "📰"),
-    ("news", "📰"),
-    ("document", "📄"),
-    ("pdf", "📄"),
-    ("cv", "📄"),
-    ("sensitive", "🔐"),
-    ("code", "💻"),
-    ("forum", "💬"),
-    ("portfolio", "🎨"),
-    ("academic", "🎓"),
-    ("job", "💼"),
-    ("compan", "🏢"),
-    ("business", "🏢"),
-    ("director", "📞"),
-    ("record", "🏛"),
-    ("institution", "🏛"),
-    ("association", "🤝"),
-    ("classified", "🏷"),
-    ("appearance", "🎤"),
-)
 _LABEL_MAX = 60
-
-
-def category_icon(category: str) -> str:
-    lowered = category.lower()
-    return next((icon for key, icon in _ICONS if key in lowered), "🔎")
 
 
 def dork_label(query: str) -> str:
@@ -52,9 +25,9 @@ def dork_label(query: str) -> str:
 
 
 def _unicode_printable() -> bool:
-    """False when stdout's encoding cannot show emoji/box drawing (e.g. cp1252): ASCII fallback."""
+    """False when stdout's encoding cannot show box drawing (e.g. cp1252): ASCII fallback."""
     try:
-        "🔎╭▸".encode(sys.stdout.encoding or "ascii")
+        "╭▸".encode(sys.stdout.encoding or "ascii")
     except (UnicodeEncodeError, LookupError):
         return False
     return True
@@ -69,9 +42,8 @@ def render_cards(groups: Mapping[str, Sequence[Dork]], *, color: bool = False) -
     console = Console(file=buffer, width=width, force_terminal=color, color_system="standard" if color else None)
     unicode_ok = _unicode_printable()
     for category, dorks in groups.items():
-        icon = f"{category_icon(category)} " if unicode_ok else ""
         body = Group(*(Text(("▸ " if unicode_ok else "- ") + dork_label(d.query), style=Style(link=to_google_url(d.query))) for d in dorks))
-        console.print(Panel(body, title=f"{icon}{category} ({len(dorks)})", title_align="left", box=box.ROUNDED if unicode_ok else box.ASCII))
+        console.print(Panel(body, title=f"{category} ({len(dorks)})", title_align="left", box=box.ROUNDED if unicode_ok else box.ASCII))
     return buffer.getvalue().rstrip()
 
 
@@ -88,7 +60,6 @@ button{background:var(--card);color:var(--fg);border:1px solid var(--line);borde
 details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
 summary{cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
 summary::-webkit-details-marker{display:none}
-.ico{font-size:1.4em}
 .count{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:0 10px;font-size:.85em}
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .pills a{color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:.9em;text-decoration:none;word-break:break-word}
@@ -111,7 +82,7 @@ def render_html(groups: Mapping[str, Sequence[Dork]], *, title: str = "Dorkint")
             for d in dorks
         )
         cards.append(
-            f'<details><summary><span class="ico">{category_icon(category)}</span>{escape(category)}'
+            f'<details><summary>{escape(category)}'
             f'<span class="count">{len(dorks)}</span></summary><div class="pills">{pills}</div></details>'
         )
     total = sum(len(d) for d in groups.values())

@@ -2,17 +2,12 @@ import re
 
 from dorkint.builder import Dork
 from dorkint.output import to_google_url
-from dorkint.visual import category_icon, dork_label, render_cards, render_html
+from dorkint.visual import dork_label, render_cards, render_html
 
 GROUPS = {
     "Social networks": [Dork("Social networks", 'site:x.com "a&b"'), Dork("Social networks", "site:y.com a")],
     "Documents": [Dork("Documents", "filetype:pdf a")],
 }
-
-
-def test_icon_matches_category_keyword_with_fallback() -> None:
-    assert category_icon("Social networks") != category_icon("Documents")
-    assert category_icon("Totally unknown") == "🔎"
 
 
 def test_label_is_short_single_line() -> None:

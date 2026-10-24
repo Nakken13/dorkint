@@ -51,7 +51,7 @@ The output is a list of URLs, one per line, under `## Category` headers.
 `--out` saves to a file and refuses to overwrite an existing file without
 `--force`. Argument errors return exit code 2.
 
-`--html FILE` writes a visual report: one collapsible card per category, with an icon and a link count; each dork is a short button and the long Google URL stays hidden. Open the file in a browser. The interactive menu shows the same category cards in the terminal (labels are clickable links where the terminal supports it) and has an option to open the report directly.
+`--html FILE` writes a visual report: one collapsible card per category, with a link count; each dork is a short button and the long Google URL stays hidden. Open the file in a browser. The interactive menu shows the same category cards in the terminal (labels are clickable links where the terminal supports it) and has an option to open the report directly.
 
 `dorkint --info` lists the dork patterns of each mode, by category, without
 generating anything. A bracketed suffix shows what a pattern requires: a
