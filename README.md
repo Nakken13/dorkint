@@ -114,6 +114,44 @@ A bracketed suffix shows what a pattern requires: a refinement (`[--city]`) or a
 
 </details>
 
+## How it works
+
+From what you type to the links you get. Nothing is sent anywhere: dorkint only builds Google search URLs.
+
+```mermaid
+flowchart LR
+    A["Input<br/>CLI args or menu"] --> B["Clean<br/>strip quotes and spaces"]
+    B --> C["Validate<br/>non-empty value,<br/>supported refinements,<br/>keyword guardrail"]
+    C --> D["Values<br/>{primary} {city} {company}<br/>+ mode-derived values"]
+    D --> E["Fill patterns<br/>skip patterns missing a value,<br/>append keyword, deduplicate"]
+    E --> F["Dorks<br/>{category: [query]}"]
+    F --> G["Google URLs<br/>URL-encoded"]
+    G --> H1["Terminal<br/>links by category"]
+    G --> H2["--out<br/>text file"]
+    G --> H3["--html<br/>visual report"]
+```
+
+1. **Input.** `dorkint <mode> <value...>` or the interactive menu. The mode picks a set of dork patterns (`modes/*.py`).
+2. **Clean and validate** (`builder.py`). Quotes are stripped, an empty value is refused, a refinement the mode does not use is refused,
+   and a `--keyword` that looks like a credential search is rejected (`guardrails.py`).
+3. **Values.** `{primary}` is your value between quotes; `--city` and `--company` fill `{city}` / `{company}`.
+   A mode can derive more from the primary value: the domain and local part of an email, the 5 spellings of a phone number,
+   or, for `fullname` with two words, the first and last name as separate terms (`"john" "doe"`, matched in any order).
+   Field operators such as `intitle:` keep the exact phrase through `{phrase}`.
+4. **Fill the patterns.** Each category lists patterns. A pattern whose values you did not give is skipped,
+   the keyword is appended, and duplicates are dropped. Empty categories disappear.
+5. **Output** (`output.py`, `visual.py`). Each dork becomes a Google URL. They are printed under `## Category` headers,
+   optionally saved with `--out`, or rendered as a self-contained HTML report with `--html` (one card per category, live filter).
+
+Example, `dorkint fullname john doe --city Lyon`:
+
+| Step | Result |
+|------|--------|
+| Pattern | `site:linkedin.com/in {primary} {city}` |
+| Values | `{primary}` = `"john" "doe"`, `{city}` = `"Lyon"` |
+| Dork | `site:linkedin.com/in "john" "doe" "Lyon"` |
+| URL | `https://www.google.com/search?q=site%3Alinkedin.com%2Fin+%22john%22+%22doe%22+%22Lyon%22` |
+
 ## Scope and limits
 
 - **France only for now** (Infogreffe, societe.com, Pages Jaunes, data.gouv.fr, BODACC, Journal Officiel...).
