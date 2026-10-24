@@ -18,7 +18,7 @@ def _clean(value):
 
 def needs(pattern):
     """Refinements / derived values a pattern needs, in order of appearance."""
-    return list(dict.fromkeys(n for n in re.findall(r"\{(\w+)\}", pattern) if n not in ("primary", "raw")))
+    return list(dict.fromkeys(n for n in re.findall(r"\{(\w+)\}", pattern) if n not in ("primary", "raw", "phrase")))
 
 
 def refinements_of(mode):
@@ -42,8 +42,9 @@ def generate(mode, primary, refinements=None, keyword=None):
         raise DorkintError(f"Keyword: forbidden term(s) {forbidden} (credentials guardrail).")
     suffix = f' "{keyword}"' if keyword else ""
 
-    # {primary}, {city}... go between quotes; {raw} is the primary value as is
-    values = {"primary": f'"{primary}"', "raw": primary} | {k: f'"{v}"' for k, v in given.items()}
+    # {primary}, {city}... go between quotes; {raw} is the primary value as is; {phrase} is always the exact quoted phrase
+    # (field operators such as intitle: only take a single term, a mode may replace {primary} by a group)
+    values = {"primary": f'"{primary}"', "phrase": f'"{primary}"', "raw": primary} | {k: f'"{v}"' for k, v in given.items()}
     if hasattr(MODES[mode], "values"):
         values |= MODES[mode].values(primary)
 

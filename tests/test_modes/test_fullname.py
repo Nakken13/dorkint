@@ -1,9 +1,12 @@
+import re
+
 import pytest
 
 from dorkint.builder import generate, refinements_of
 from dorkint.modes import MODES
 
 PRINCIPAL = "Jean Dupont"
+NAME_TERMS = '"Jean" "Dupont"'
 FORBIDDEN = (
     "password", "passwd", "mot de passe", "secret", "token",
     "api_key", ".env", "credentials", "id_rsa", "dump",
@@ -36,7 +39,7 @@ def test_every_category_has_dork_with_quoted_principal() -> None:
         assert dorks, f"empty category: {category}"
         if category == "Name variants":
             continue  # built from first / last name, not the full quoted name
-        assert all(f'"{PRINCIPAL}"' in d for d in dorks)
+        assert all(NAME_TERMS in d or f'"{PRINCIPAL}"' in d for d in dorks)
 
 
 def test_key_sources_covered() -> None:
@@ -70,3 +73,20 @@ def test_no_credentials_terms(term: str) -> None:
     for patterns in MODES["fullname"].CATEGORIES.values():
         for pattern in patterns:
             assert term not in pattern.lower()
+
+
+def test_first_and_last_name_are_separate_quoted_terms() -> None:
+    dorks = [d for ds in generate("fullname", "john doe").values() for d in ds]
+    assert 'site:github.com "john" "doe"' in dorks
+
+
+def test_field_operators_keep_the_exact_phrase() -> None:
+    dorks = [d for ds in generate("fullname", PRINCIPAL).values() for d in ds]
+    assert 'allintitle:"Jean Dupont"' in dorks
+    assert not any(re.search(r"(allin|in)(title|text|anchor):\(", d) for d in dorks)
+
+
+def test_other_than_two_words_keeps_the_exact_phrase() -> None:
+    for name in ("Jean", "Jean Pierre Dupont"):
+        dorks = [d for ds in generate("fullname", name).values() for d in ds]
+        assert any(f'site:github.com "{name}"' == d for d in dorks)
